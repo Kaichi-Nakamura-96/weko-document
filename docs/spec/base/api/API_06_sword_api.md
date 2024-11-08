@@ -1,20 +1,19 @@
-### SWORD API
+# SWORD API
 
-#### 目的・用途
+## 目的・用途
 
 クライアントからSWORDv3プロトコルに従いリポジトリ上のアイテム操作を実現する。
 
-#### 利用方法
+## 利用方法
 
 APIの認証にはOAuth2を利用する。
 
-アクセストークンの発行はAPI-1:OAuth2を参照。
+アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。
 
-**Scope：**
-
+### Scope：
 deposit: write
 
-**エンドポイント：**
+### エンドポイント：
 
 <table>
 <thead>
@@ -76,29 +75,26 @@ deposit: write
 </tbody>
 </table>
 
-##### CURLでのリクエスト実行例：
+### CURLでのリクエスト実行例：
 
 各APIのリクエスト仕様の詳細は後述。
 
-###### GET /sword/service-document
+#### GET /sword/service-document
 
 ```
-curl https://192.168.56.103/sword/service-document -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" |
+$ curl -X GET https://192.168.56.101/sword/service-document -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo"
 ```
 
+  - -H オプション
 
-  - > \-H オプション
-    
-      - > Authorization は "Bearer" + " (半角スペース)" + "認証キー"の形式で指定する
+    - リクエストにカスタムヘッダーを追加する
+    - Authorization は "Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する
 
-###### POST /sword/service-document**
 
+#### POST /sword/service-document
 
 ```
-curl -s -k https://weko3.ir.rcos.nii.ac.jp/sword/service-document -F
- "file=@import.zip;type=application/zip" -H "Authorization:Bearer 50is1B9XcyHcyRckWx9z0V
-2XZnpHq7" -H "Content-Disposition:attachment; filename=import.zip" -H "Packaging:http://
-purl.org/net/sword/3.0/package/SimpleZip"| jq .
+$ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@import.zip;type=application/zip" -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" -H "Content-Disposition:attachment; filename=import.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip" | jq .
 {
   "@context": "https://swordapp.github.io/swordv3/swordv3.jsonld",
   "@id": "https://weko3.ir.rcos.nii.ac.jp/sword/deposit/96568",
@@ -140,55 +136,42 @@ purl.org/net/sword/3.0/package/SimpleZip"| jq .
       "description": ""
     }
   ]
-}                                                                                       ```
-                                                                                |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| curl https://192.168.56.103/sword/service-document -F "file=@export-all3.zip;type=application/zip" -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" -H "Content-Disposition:attachment; filename=export-all3.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip" |
+}
+```
 
-  - > \-F オプション
-    
+  - -F オプション
       - multipart/form-data 形式で POSTするファイルを指定する
-    
       - boundaryやContent-Lengthは自動で付加されるため自前で指定しなくてもよい
-    
       - ファイル名の先頭には@を付加すること
-    
       - ファイルのContent-Typeを"application/zip"とするため、ここでtypeを指定する（指定しないと application/octet-stream となってしまう）
 
-  - > \-H オプション
-    
-      - Authorization は "Bearer" + " (半角スペース)" + "認証キー"の形式で指定する
-    
+  - -H オプション
+      - Authorization は "Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する
       - Content-Disposition の filename は -Fオプションで指定したファイルのファイル名と一致させる
-    
       - Packaging は "http://purl.org/net/sword/3.0/package/SimpleZip" を指定
-    
       - 必須の Content-Length および Content-Type については前述の通り、-Fオプションにて自動付加されるため-Hオプションでの指定は不要
 
 
-**　3. GET /sword/deposit/\<recid\>**
+#### GET /sword/deposit/\<recid\>
 
-|                                                                                                                                    |
-| ---------------------------------------------------------------------------------------------------------------------------------- |
-| curl https://192.168.56.103/sword/deposit/1 -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" |
+```
+curl -X GET https://192.168.56.101/sword/deposit/1 -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo"
+```
 
-  - > \-H オプション
-    
-      - Authorization は "Bearer" + " (半角スペース)" + "認証キー"の形式で指定する
+  - H オプション
+      - Authorization は "Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する
 
-**　4. DELETE /sword/deposit/\<recid\>**
+#### DELETE /sword/deposit/\<recid\>
 
-|                                                                                                                                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------- |
-| curl -X DELETE https://192.168.56.103/sword/deposit/1 -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" |
+```
+curl -X DELETE https://192.168.56.101/sword/deposit/1 -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo"
+```
 
-  - > \-H オプション
-    
-      - Authorization は "Bearer" + " (半角スペース)" + "認証キー"の形式で指定する
+  - H オプション
+      - Authorization は "Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する
 
-<!-- end list -->
 
-  - 利用可能なロール
+## 利用可能なロール
 
 <table>
 <thead>
@@ -219,21 +202,17 @@ purl.org/net/sword/3.0/package/SimpleZip"| jq .
 </tbody>
 </table>
 
-  - 機能内容
-
-<!-- end list -->
+## 機能内容
 
   - 各APIへのリクエストに応じて処理を実行しレスポンスを返す
-    
       - OAuthアクセストークンによるユーザー認証を必須とする
 
   - アイテム登録機能で登録に使用するZIPファイルはインポートで使用するものと同様の形式のみ使用できる。
-    
-      - ZIPファイル形式の詳細は [ADMIN-2-4:インポート](./functional_design.md#インポート) を参照
+      - ZIPファイル形式の詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
 
-> API仕様
+## API仕様
 
-  - > サービスドキュメント取得機能：GET /sword/service-document
+### サービスドキュメント取得機能：GET /sword/service-document
 
 <table>
 <thead>
@@ -272,7 +251,7 @@ purl.org/net/sword/3.0/package/SimpleZip"| jq .
 <td>Authorization</td>
 <td>○</td>
 <td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“認証キー”の形式で指定する。</td>
+“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
 <td>“Bearer xxxxxxx”</td>
 </tr>
 <tr class="odd">
@@ -334,7 +313,7 @@ purl.org/net/sword/3.0/package/SimpleZip"| jq .
 </tbody>
 </table>
 
-  - > アイテム登録機能：POST /sword/service-document
+### アイテム登録機能：POST /sword/service-document
 
 <table>
 <thead>
@@ -373,7 +352,7 @@ purl.org/net/sword/3.0/package/SimpleZip"| jq .
 <td>Authorization</td>
 <td>○</td>
 <td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“認証キー”の形式で指定する。</td>
+“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
 <td>“Bearer xxxxxxx”</td>
 </tr>
 <tr class="odd">
@@ -506,7 +485,7 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 </tbody>
 </table>
 
-  - > アイテム状態取得機能：GET /sword/deposit/\<recid\>
+### アイテム状態取得機能：GET /sword/deposit/\<recid\>
 
 <table>
 <thead>
@@ -545,7 +524,7 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 <td>Authorization</td>
 <td>○</td>
 <td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“認証キー”の形式で指定する。</td>
+“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
 <td>“Bearer xxxxxxx”</td>
 </tr>
 <tr class="odd">
@@ -635,7 +614,7 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 </tbody>
 </table>
 
-  - > アイテム削除機能：DELETE /sword/deposit/\<recid\>
+### アイテム削除機能：DELETE /sword/deposit/\<recid\>
 
 <table>
 <thead>
@@ -674,7 +653,7 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 <td>Authorization</td>
 <td>○</td>
 <td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“認証キー”の形式で指定する。</td>
+“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
 <td>“Bearer xxxxxxx”</td>
 </tr>
 <tr class="odd">
@@ -757,10 +736,10 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 </tbody>
 </table>
 
-> ドキュメント仕様
+## ドキュメント仕様
 
-  - > サービスドキュメント  
-    > サーバー全体の機能と操作パラメータを定義したドキュメント
+### サービスドキュメント
+サーバー全体の機能と操作パラメータを定義したドキュメント
 
 <table>
 <thead>
@@ -938,8 +917,8 @@ http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
 </tbody>
 </table>
 
-  - > ステータスドキュメント  
-    > アイテムの内容と現在の状態に関する詳細情報を示すドキュメント
+### ステータスドキュメント
+アイテムの内容と現在の状態に関する詳細情報を示すドキュメント
 
 <table>
 <thead>
@@ -1187,8 +1166,8 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 </tbody>
 </table>
 
-  - > エラードキュメント  
-    > エラー内容を表すドキュメント
+### エラードキュメント
+エラー内容を表すドキュメント
 
 <table>
 <thead>
@@ -1229,7 +1208,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 </tbody>
 </table>
 
-> エラータイプ
+## エラータイプ
 
 | エラータイプ文字列                    | エラーコード | エラー原因等                                               |
 | ---------------------------- | ------ | ---------------------------------------------------- |
@@ -1256,97 +1235,61 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 | SegmentLimitExceeded         | 400    | セグメント数が最大値を超えている。                                    |
 | UnexpectedSegment            | 400    | サーバーが予期していないセグメントを受信した。                              |
 
-  - 関連モジュール
+## 関連モジュール
 
-<!-- end list -->
 
-  - > invenio\_oauth2server：OAuthトークンによるユーザー認証を行う
+  - invenio\_oauth2server：OAuthトークンによるユーザー認証を行う
 
-  - > invenio\_deposit：OAuthトークンが参照するデポジット操作スコープを定義している
+  - invenio\_deposit：OAuthトークンが参照するデポジット操作スコープを定義している
 
-  - > weko\_records\_ui：レコード情報の取得、アイテムの削除を実行する
+  - weko\_records\_ui：レコード情報の取得、アイテムの削除を実行する
 
-  - > weko\_search\_ui：インポート処理を実行する
+  - weko\_search\_ui：インポート処理を実行する
 
-<!-- end list -->
 
-  - 処理概要
+## 処理概要
 
-<!-- end list -->
+### サービスドキュメント取得機能：GET /sword/service-document
+- リクエストをチェックする
+    - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
+    - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
+- サーバー設定値を参照し、サービスドキュメントを生成する
+- サービスドキュメントを返却する
 
-  - > サービスドキュメント取得機能：GET /sword/service-document
-    
-      - リクエストをチェックする
-        
-          - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
-        
-          - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-    
-      - サーバー設定値を参照し、サービスドキュメントを生成する
-    
-      - サービスドキュメントを返却する
+### アイテム登録機能：POST /sword/service-document
+- リクエストをチェックする
+    - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
+    - 認証に使用されたOAuthトークンのScopeを確認する
+    - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
+    - 送付されたファイルの有無を確認する
+    - ファイルサイズを確認する
+    - Content-Typeを確認する
+    - Packagingを確認する
+- ファイル内容に不備が無いかのチェックを行う
+- ファイル内のアイテムが新規登録か否かを確認する
+- インポート処理を行う
+- 登録したアイテムのステータスドキュメントを生成する
+    - インポート処理から返されたrecidからアイテム情報を取得する
+    - 取得したアイテム情報からステータスドキュメントを生成する
+- ステータスドキュメントを返却する
 
-  - > アイテム登録機能：POST /sword/service-document
-    
-      - リクエストをチェックする
-        
-          - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
-        
-          - 認証に使用されたOAuthトークンのScopeを確認する
-        
-          - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-        
-          - 送付されたファイルの有無を確認する
-        
-          - ファイルサイズを確認する
-        
-          - Content-Typeを確認する
-        
-          - Packagingを確認する
-    
-      - ファイル内容に不備が無いかのチェックを行う
-    
-      - ファイル内のアイテムが新規登録か否かを確認する
-    
-      - インポート処理を行う
-    
-      - 登録したアイテムのステータスドキュメントを生成する
-        
-          - インポート処理から返されたrecidからアイテム情報を取得する
-        
-          - 取得したアイテム情報からステータスドキュメントを生成する
-    
-      - ステータスドキュメントを返却する
+### アイテム状態取得機能：GET /sword/deposit/\<recid\>
+- リクエストをチェックする
+    - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
+    - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
+- 指定されたrecidからアイテム情報を取得する
+- 取得したアイテム情報からステータスドキュメントを生成する
+- ステータスドキュメントを返却する
 
-  - > アイテム状態取得機能：GET /sword/deposit/\<recid\>
-    
-      - リクエストをチェックする
-        
-          - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
-        
-          - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-    
-      - 指定されたrecidからアイテム情報を取得する
-    
-      - 取得したアイテム情報からステータスドキュメントを生成する
-    
-      - ステータスドキュメントを返却する
+### アイテム削除機能：DELETE /sword/deposit/\<recid\>
+- リクエストをチェックする
+    - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
+    - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
+- 指定されたrecidを引数にsoft\_delete処理を実行する
+- 空のレスポンスを返却する
 
-  - > アイテム削除機能：DELETE /sword/deposit/\<recid\>
-    
-      - リクエストをチェックする
-        
-          - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
-        
-          - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-    
-      - 指定されたrecidを引数にsoft\_delete処理を実行する
-    
-      - 空のレスポンスを返却する
 
-<!-- end list -->
-
-  - > 更新履歴
+## 更新履歴
 
 <table>
 <thead>
