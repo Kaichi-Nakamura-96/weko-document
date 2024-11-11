@@ -8,7 +8,8 @@
 
 APIの認証にはOAuth2を利用する。
 
-アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。
+アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。  
+GakuNin RDMメタデータに対応したアイテム登録更新機能については[API-12:GRDM_Link](./API_12_GRDM_Link.md)を参照。
 
 ### Scope：
 deposit: write
@@ -92,12 +93,13 @@ $ curl -X GET https://192.168.56.101/sword/service-document -H "Authorization:Be
 
 
 #### POST /sword/service-document
+レスポンスの例も示す。
 
 ```
 $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@import.zip;type=application/zip" -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" -H "Content-Disposition:attachment; filename=import.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip" | jq .
 {
   "@context": "https://swordapp.github.io/swordv3/swordv3.jsonld",
-  "@id": "https://weko3.ir.rcos.nii.ac.jp/sword/deposit/96568",
+  "@id": "https://192.168.56.101/sword/deposit/96568",
   "@type": "Status",
   "actions": {
     "appendFiles": false,
