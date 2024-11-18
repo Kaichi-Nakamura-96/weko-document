@@ -55,6 +55,47 @@ deposit: write
 $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@crate.zip;type=application/zip" -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" -H "Content-Disposition:attachment; filename=crate.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip -H "On-Behalf-Of:Weko Taro; mail=weko.taro@nii.ac.jp"
 ```
 
+## API仕様
+
+### アイテム登録機能：POST /sword/service-document
+
+- エンドポイント : POST /sword/service-document
+- 概要 : RO-Crate+BagIt形式のZIPファイルをWEKO3のアイテムとして登録する。
+
+#### リクエスト
+
+##### ヘッダ
+
+| フィールド          | 必須 | 説明                                                                                                                                                                                                                                                                                  | 例                                                                         |
+| ------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Authorization       | ○    | 操作するWEKOユーザーのOAuth認証情報。<br/>“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。                                                                                                                                                                             | “Bearer xxxxxxx”                                                           |
+| On-Behalf-Of        | -    | 代理投稿ユーザーのメールアドレスを指定する。                                                                                                                                                                                                                                          | “user@example.com”                                                         |
+| Content-Disposition | ○    | リクエストボディに付加したファイルのファイル名を指定する。                                                                                                                                                                                                                            | “attachment; filename=example.zip”                                         |
+| Content-Length      | -    | リクエストボディに付加したファイルサイズを指定する。                                                                                                                                                                                                                                  | 1024000                                                                    |
+| Content-Type        | ○    | リクエストボディにファイルを付加するため multipart/form-data を指定する。                                                                                                                                                                                                             | multipart/form-data; boundary=xxxxxxxx                                     |
+| Packaging           | ○    | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | “http://purl.org/net/sword<br/>/3.0/package/SimpleZip”                     |
+| Digest              | ○    | リクエストボディに付加したファイルのハッシュ値を指定する。                                                                                                                                                                                                                            | "SHA-256=a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b56c86b3e0aeea5f1" |
+
+##### ボディ
+
+| フィールド | 必須 | 説明                                                                                                             | 例                                     |
+| ---------- | ---- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| file       | ○    | form-data 形式でボディにZIPファイルを付加する。<br/>ファイルのContent-Type には“application/zip”を指定すること。 | "file=@project/post_files/example.zip" |
+
+#### レスポンス
+
+| コード | ドキュメント           | 説明                                                                                                             |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 200    | ステータスドキュメント | 登録されたアイテムのステータスドキュメントを返す。                                                               |
+| 400    | エラードキュメント     | リクエスト内容に何らかの不備がある場合。                                                                         |
+| 401    | エラードキュメント     | リクエストでAuthorization ヘッダーが提供されない場合。                                                           |
+| 403    | エラードキュメント     | 認証に失敗した場合。<br/>認証したOAuthトークンが「deposit:write」スコープを持っていない場合。                    |
+| 404    | エラードキュメント     | 登録されたアイテムが見つからない場合。                                                                           |
+| 412    | エラードキュメント     | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、リクエストでOn-Behalf-Of ヘッダーが提供された場合。 |
+| 413    | エラードキュメント     | 送信されたファイルのサイズがサーバーに設定されたmaxUploadSizeを超えている場合。                                  |
+| 415    | エラードキュメント     | ヘッダーまたはボディに付加されたファイルのContent-Typeがサーバー側でサポートされていない場合。                   |
+| 500    | エラードキュメント     | サーバー内部エラーが発生した場合。                                                                               |
+
 ## 処理概要
 
 ### アイテム登録機能
