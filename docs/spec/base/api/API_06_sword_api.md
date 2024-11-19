@@ -1244,6 +1244,8 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 
   - invenio\_deposit：OAuthトークンが参照するデポジット操作スコープを定義している
 
+  - weko_swordserver：リクエストの処理を行う
+
   - weko\_records\_ui：レコード情報の取得、アイテムの削除を実行する
 
   - weko\_search\_ui：インポート処理を実行する
