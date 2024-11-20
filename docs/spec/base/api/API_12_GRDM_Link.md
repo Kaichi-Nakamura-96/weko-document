@@ -6,11 +6,13 @@ GakuNin RDMメタデータに対応したアイテム登録更新機能
 - [機能内容](#機能内容)
 - [API仕様](#api仕様)
 - [処理概要](#処理概要)
+- [エラーメッセージ](#エラーメッセージ)
+- [現在の設定値](#現在の設定値)
 
 
 ## 目的・用途
 
-GakuNin RDM(以下、GRDM)から送られてくるJSON-LD形式のメタデータを、SWORDv3プロトコルに従い、WEKO3に登録および更新する。  
+GakuNin RDM(以下、GRDM)から送られてくる、JSON-LD形式のメタデータが付与されたファイルを、SWORDv3プロトコルに従い、WEKO3に登録および更新する。  
 TSVおよび、CSV形式のメタデータを登録する機能は、[API_06_sword_api](./API_06_sword_api.md)を参照。
 
 ### Scope：
@@ -91,15 +93,15 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 
 ##### ヘッダー
 
-| フィールド          | TSV/CSV登録で必須 | GRDM連携で必須 | 説明                                                                                                                                                                                                                                                                                  | 例                                                                                                                                         |
-| ------------------- | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Authorization       | ○                 | ○              | 操作するWEKOユーザーのOAuth認証情報。<br/>“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。                                                                                                                                                                             | “Bearer xxxxxxx”                                                                                                                           |
-| On-Behalf-Of        | -                 | -              | 代理投稿ユーザーのパーソナルアクセストークンまたはePPNが入る。                                                                                                                                                                                                                        | パーソナルアクセストークン: “aB3dE5Fg7Hj9Kl1Mn2Pq4Rs6Tu8Vw0XyZ1aB3cD5eF7gH9iJ2kL4mN6oP8qR0sT1uV3wX5yZ7”<br>ePPN: "sample@sampleuniv.ac.jp" |
-| Content-Disposition | ○                 | ○              | リクエストボディに付加したファイルのファイル名を指定する。                                                                                                                                                                                                                            | “attachment; filename=example.zip”                                                                                                         |
-| Content-Length      | ○                 | -              | リクエストボディに付加したファイルサイズを指定する。                                                                                                                                                                                                                                  | 1024000                                                                                                                                    |
-| Content-Type        | ○                 | ○              | リクエストボディにファイルを付加するため multipart/form-data を指定する。                                                                                                                                                                                                             | multipart/form-data; boundary=xxxxxxxx                                                                                                     |
-| Packaging           | ○                 | ○              | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | “http://purl.org/net/sword/3.0/package/SimpleZip”                                                                                          |
-| Digest              | -                 | ○              | リクエストボディに付加したファイルのハッシュ値を指定する。(GRDM連携のみで使用)                                                                                                                                                                                                        | "SHA-256=a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b56c86b3e0aeea5f1"                                                                 |
+| フィールド          | 必須 | 説明                                                                                                                                                                                                                                                                                   | 例                                                                                                                                           |
+| ------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authorization       | ○   | 操作するWEKOユーザーのOAuth認証情報。<br/>“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。                                                                                                                                                                        | “Bearer xxxxxxx”                                                                                                                           |
+| On-Behalf-Of        | -    | 代理投稿ユーザーのパーソナルアクセストークンまたはePPNが入る。                                                                                                                                                                                                                         | パーソナルアクセストークン: “aB3dE5Fg7Hj9Kl1Mn2Pq4Rs6Tu8Vw0XyZ1aB3cD5eF7gH9iJ2kL4mN6oP8qR0sT1uV3wX5yZ7”<br>ePPN: "sample@sampleuniv.ac.jp" |
+| Content-Disposition | ○   | リクエストボディに付加したファイルのファイル名を指定する。                                                                                                                                                                                                                             | “attachment; filename=example.zip”                                                                                                         |
+| Content-Length      | ○   | リクエストボディに付加したファイルサイズを指定する。<br/>※現在は指定していなくてもエラーとならない。                                                                                                                                                                                  | 1024000                                                                                                                                      |
+| Content-Type        | ○   | リクエストボディにファイルを付加するため multipart/form-data を指定する。                                                                                                                                                                                                              | multipart/form-data; boundary=xxxxxxxx                                                                                                       |
+| Packaging           | ○   | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | “http://purl.org/net/sword/3.0/package/SimpleZip”                                                                                          |
+| Digest              | △   | リクエストボディに付加したファイルのハッシュ値を指定する。<br/>ダイジェスト検証設定(設定値:17)が有効の場合、BugIt形式のファイルを登録するときに必須。                                                                                                                                  | "SHA-256=a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b56c86b3e0aeea5f1"                                                                   |
 
 ##### ボディ
 
@@ -121,7 +123,10 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 | 415    | エラードキュメント     | ヘッダーーまたはボディに付加されたファイルのContent-Typeがサーバー側でサポートされていない場合。                  |
 | 500    | エラードキュメント     | サーバー内部エラーが発生した場合。                                                                                |
 
+## ファイル形式
+
 ## 処理概要
+使用する設定値は[現在の設定値](#現在の設定値)、エラーメッセージは[エラーメッセージ](#エラーメッセージ)を参照。
 
 ### アイテム登録機能
 #### GRDM側(想定)
@@ -132,22 +137,33 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 
 #### WEKO3側
 1. リクエストをチェックする
-    - Authorizationヘッダーに記載されたアクセストークンを使用しユーザーを認証する。  
+    - **`Authorization`ヘッダー**に記載されたアクセストークンを使用しユーザーを認証する。  
       アクセストークンのScopeを確認し、`deposit:write`が与えられていなければエラーとする。
-    - On-Behalf-Ofヘッダーが存在する場合、取得しアイテム情報とする。
-    - Content-Dispositionヘッダーを解析する。  
+    - **`Content-Length`ヘッダー**およびファイルサイズを検証する。  
+      ファイルサイズ検証設定（設定値:20）が有効であれば、`Content-Length`ヘッダーが不正な場合エラーとする。  
+      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（設定値:21）を上回っていればえエラーとする。
+    - **`Content-Type`ヘッダー**を検証する。  
+      現在の実装では、ヘッダーがなくてもエラーとならない。
+    - **`Content-Disposition`ヘッダー**を解析する。  
       値が`attachment`かつオプションにファイル名が指定されているかを確認し、満たさない場合はエラーとする。
-    - 送付されたファイルを検証する。  
-      ファイルの有無やファイル名の合致を確認し、問題があればエラーとする。  
-      ファイルサイズを確認する
-    - Content-Typeを確認する
-    - Packagingを確認する
-    - Digestとリクエストボディのハッシュ値が一致するか確認する
-    - SWORD APIでは使用可能なエラータイプが定められているため、適切なエラータイプが存在しない場合はBadRequest(エラーコード400)とし、エラードキュメントにエラー原因を記述し返却する
+    - **`Content-Type`ヘッダー**をもとに送付されたファイルを検証する。  
+      ヘッダーの値が`application/zip`でなければ、エラーとする。  
+      ファイルの有無や上記のファイル名の合致を確認し、問題があればエラーとする。
+    - **`Packaging`ヘッダー**を検証し、メタデータの形式を判定する。
+    - メタデータ形式がJSON-LD、かつダイジェスト検証設定（設定値:17）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
+    - **`On-Behalf-Of`ヘッダー**が存在する場合、取得しアイテム情報とする。
+
+    ※ SWORD APIでは使用可能なエラータイプが定められているため、適切なエラータイプが存在しない場合はBadRequest(エラーコード400)とし、エラードキュメントにエラー原因を記述し返却する。
 
 2. ファイル内容に不備が無いかのチェックを行う
-    - Zipを展開し、必要なファイルが含まれているか確認する
-    - 登録するファイルが`manifest-sha256.txt` に記載されているハッシュ値と一致するか確認する
+    - Zipファイルを展開し、必要なファイルが含まれているか確認する。メタデータ形式によって必須事項が異なる。
+
+        **TSV/CSV形式**
+        - TSV/CSVファイルが含まれていなければエラーとする。
+
+        **JSON-LD形式**
+        - 登録対象のファイルそれぞれのハッシュ値が`manifest-sha256.txt` に記載されている値と一致しなければエラーとなる。
+
 
 3. アクセストークンから、マッピング定義、登録先情報を取得する
     - アクセストークンからクライアントIDを取得する
@@ -167,6 +183,87 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     - 承認不要のワークフローの場合はワークフローを最後まで実行する。
     - 必須のメタデータが存在しない場合はエラーとし、どのメタデータが必須かJSON-LD形式で返却する
     - マッピング先が無いメタデータは不可視のテキストエリアに保存する
+
+## エラーメッセージ
+
+## 現在の設定値
+
+```python
+1. WEKO_SWORDSERVER_DEFAULT_VALUE = 'foobar'
+
+2. WEKO_SWORDSERVER_BASE_TEMPLATE = 'weko_swordserver/base.html'
+
+3. WEKO_SWORDSERVER_SWORD_VERSION = 'http://purl.org/net/sword/3.0'
+
+4. WEKO_SWORDSERVER_SERVICEDOCUMENT_ABSTRACT = ""
+
+5. WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT = ['*/*']
+
+6. WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ['application/zip']
+
+7. WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True
+
+8. WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = []
+
+9. WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_PACKAGING = ['*']
+    """ List of Packaging Formats which are acceptable to the server.
+
+        ['*'] or List of Packaging Formats URI
+            - http://purl.org/net/sword/3.0/package/Binary
+            - http://purl.org/net/sword/3.0/package/SimpleZip
+            - http://purl.org/net/sword/3.0/package/SWORDBagIt
+    """
+
+10. WEKO_SWORDSERVER_SERVICEDOCUMENT_COLLECTION_POLICY = {}
+
+11. WEKO_SWORDSERVER_SERVICEDOCUMENT_TREATMENT = {}
+
+12. WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING = ""
+
+13. WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING_MAX_IDLE = 3600
+
+14. WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False
+
+15. WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True
+
+16. WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]
+
+17. WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True
+
+18. WEKO_SWORDSERVER_SERVICEDOCUMENT_AUTHENTICATION = ["OAuth"]
+
+19. WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []
+
+20. WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False
+
+21. WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000
+
+22. WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_BY_REFERENCE_SIZE = 30000000000000000
+
+23.WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000
+
+24. WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_SEGMENTS = 1000
+
+25. WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType
+
+26. WEKO_SWORDSERVER_REQUIRED_FILES_ROCRATE = [
+        'manifest-sha256.txt',
+        'ro-crate-metadata.json'
+    ]
+
+27. WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = [
+        'manifest-sha256.txt',
+        'metadata/sword.json'
+    ]
+
+28. WEKO_SWORDSERVER_DATASET_PLEFIX = "weko-"
+
+29. WEKO_SWORDSERVER_DATASET_IDENTIFIER = {
+        "": "./",
+        "enc": base64.b64encode(
+            f"{WEKO_SWORDSERVER_DATASET_PLEFIX}./".encode('utf-8')).decode('utf-8')
+    }
+```
 
 ---
 |    日付    | 更新内容                          |

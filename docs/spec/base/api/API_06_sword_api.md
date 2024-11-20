@@ -1212,30 +1212,30 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 
 ## エラータイプ
 
-| エラータイプ文字列                    | エラーコード | エラー原因等                                               |
-| ---------------------------- | ------ | ---------------------------------------------------- |
-| AuthenticationFailed         | 403    | 認証に失敗。                                               |
-| AuthenticationRequired       | 401    | 認証情報が不足。                                             |
-| BadRequest                   | 400    | リクエストに何らかの不備がある。                                     |
-| ByReferenceFileSizeExceeded  | 400    | サーバーの制限を超えるファイルをデポジットしようとした。                         |
-| ByReferenceNotAllowed        | 412    | サーバーが By-Reference deposit をサポートしていない。               |
-| ContentMalformed             | 400    | リクエスト本文の内容に不正がある。                                    |
-| ContentTypeNotAcceptable     | 415    | サーバーで許可されていないコンテンツタイプをリクエストした。                       |
-| DigestMismatch               | 412    | リクエストヘッダーによって提供されたdigestがサーバーで受け取ったコンテンツと一致していない。    |
+| エラータイプ文字列           | エラーコード | エラー原因等                                                                           |
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| AuthenticationFailed         | 403    | 認証に失敗。                                                                                 |
+| AuthenticationRequired       | 401    | 認証情報が不足。                                                                             |
+| BadRequest                   | 400    | リクエストに何らかの不備がある。                                                             |
+| ByReferenceFileSizeExceeded  | 400    | サーバーの制限を超えるファイルをデポジットしようとした。                                     |
+| ByReferenceNotAllowed        | 412    | サーバーが By-Reference deposit をサポートしていない。                                       |
+| ContentMalformed             | 400    | リクエスト本文の内容に不正がある。                                                           |
+| ContentTypeNotAcceptable     | 415    | サーバーで許可されていないコンテンツタイプをリクエストした。                                 |
+| DigestMismatch               | 412    | リクエストヘッダーによって提供されたdigestがサーバーで受け取ったコンテンツと一致していない。 |
 | ETagNotMatched               | 412    | リクエストヘッダーによって提供されたIf-Matchの値が更新対象コンテンツのeTagと一致していない。 |
-| ETagRequired                 | 412    | リクエストヘッダーにIf-Matchの値が指定されていない。                       |
-| Forbidden                    | 403    | サーバーによって許可されていない操作をリクエストした。                          |
-| FormatHeaderMismatch         | 415    | サーバーがサポートしていない形式のコンテンツがリクエストされた。                     |
-| InvalidSegmentSize           | 400    | セグメントアップロード時のファイルサイズが範囲外。                            |
-| MaxAssembledSizeExceeded     | 400    | セグメントアップロード時の合計ファイルサイズが最大値を超えている。                    |
-| MaxUploadSizeExceeded        | 413    | アップロードされたコンテンツサイズが最大値を超えている                          |
-| MetadataFormatNotAcceptable  | 415    | サーバーがサポートしていない形式のMetadata-Formatがリクエストされた。           |
-| MethodNotAllowed             | 405    | メソッドへのアクセスが許可されていない。                                 |
-| OnBehalfOfNotAllowed         | 412    | サーバーが On-Behalf-Of をサポートしていない。                       |
-| PackagingFormatNotAcceptable | 415    | サーバーがサポートしていない形式のPackagingフォーマットがリクエストされた。           |
-| SegmentedUploadTimedOut      | 410    | セグメントアップロード先のURLにアクセスできない。                           |
-| SegmentLimitExceeded         | 400    | セグメント数が最大値を超えている。                                    |
-| UnexpectedSegment            | 400    | サーバーが予期していないセグメントを受信した。                              |
+| ETagRequired                 | 412    | リクエストヘッダーにIf-Matchの値が指定されていない。                                         |
+| Forbidden                    | 403    | サーバーによって許可されていない操作をリクエストした。                                       |
+| FormatHeaderMismatch         | 415    | サーバーがサポートしていない形式のコンテンツがリクエストされた。                             |
+| InvalidSegmentSize           | 400    | セグメントアップロード時のファイルサイズが範囲外。                                           |
+| MaxAssembledSizeExceeded     | 400    | セグメントアップロード時の合計ファイルサイズが最大値を超えている。                           |
+| MaxUploadSizeExceeded        | 413    | アップロードされたコンテンツサイズが最大値を超えている                                       |
+| MetadataFormatNotAcceptable  | 415    | サーバーがサポートしていない形式のMetadata-Formatがリクエストされた。                        |
+| MethodNotAllowed             | 405    | メソッドへのアクセスが許可されていない。                                                     |
+| OnBehalfOfNotAllowed         | 412    | サーバーが On-Behalf-Of をサポートしていない。                                               |
+| PackagingFormatNotAcceptable | 415    | サーバーがサポートしていない形式のPackagingフォーマットがリクエストされた。                  |
+| SegmentedUploadTimedOut      | 410    | セグメントアップロード先のURLにアクセスできない。                                            |
+| SegmentLimitExceeded         | 400    | セグメント数が最大値を超えている。                                                           |
+| UnexpectedSegment            | 400    | サーバーが予期していないセグメントを受信した。                                               |
 
 ## 関連モジュール
 
