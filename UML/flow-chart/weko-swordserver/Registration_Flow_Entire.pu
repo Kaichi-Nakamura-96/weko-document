@@ -1,0 +1,29 @@
+@startuml
+
+' title フロー図
+
+!pragma useVerticalIf on
+start
+note left: リクエスト受付
+:リクエストヘッダのチェック;
+:フォーマットのチェック;
+switch (フォーマット)
+case ("JSON-LD")
+    :必須ファイルの存在確認;
+    :マッピング;
+    if (登録方式) then (直接)
+        :直接登録;
+    else (ワークフロー)
+        :ワークフロー登録;
+    endif
+case ("TSV/CSV")
+    :アイテム一括登録の処理;
+    :直接方式で登録;
+case ("XML")
+    :ファイルの確認;
+    :マッピング;
+    :ワークフロー方式で登録;
+endswitch
+:ステータスドキュメントを返却;
+stop
+@enduml

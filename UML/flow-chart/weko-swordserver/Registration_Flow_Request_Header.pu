@@ -1,0 +1,39 @@
+@startuml
+
+' title フロー図: Request Header
+
+start
+:Scopeをチェック;
+:On-Behalf-Ofヘッダ付加の許容チェック;
+switch (On-Behalf-Ofヘッダ付加が許容されているまたはOn-Behalf-Ofヘッダが存在しない)
+case (No)
+    :エラーを返す;
+    end
+case (Yes)
+    :fileをチェック;
+    switch (fileが存在する)
+    case (No)
+        :エラーを返す;
+        end
+    case (Yes)
+        switch (fileが空文字じゃない)
+        case (No)
+            :エラーを返す;
+            end
+        case (Yes)
+            :※Content-Lengthのチェック;
+            switch (Content-LengthがmaxUploadSize以下)
+            case (No)
+                :エラーを返す;
+                end
+            case (Yes)
+                :Content-Typeのチェック;
+                :Packagingのチェック;
+                switch (Packagingが許容されているものである)
+                case (No)
+                    :エラーを返す;
+                    end
+                case (Yes)
+                    :以降の処理;
+                    stop
+@enduml

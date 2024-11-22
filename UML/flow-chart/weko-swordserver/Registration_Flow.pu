@@ -1,0 +1,99 @@
+@startuml
+
+' title フロー図
+
+!pragma useVerticalIf on
+start
+if (フォーマット) then ("OTHERS"以外)
+    if ("Digest"がリクエストボディハッシュ値に一致) then (一致)
+        :zipファイルの解凍;
+        if (解凍に成功) then (成功)
+            if (メタデータファイルとmanifest-sha256.txtが含まれる) then (含まれる)
+                if (BagIt形式の必須ファイルが揃っている) then (揃っている)
+                    :マッピング定義の取得;
+                    if (マッピング定義の取得に成功) then (成功)
+                        if (登録方式) then (直接)
+                            :pass;
+                        else (ワークフロー)
+                            :ワークフローの取得;
+                            if (ワークフローが存在) then (存在する)
+                                if (ワークフローのアイテムタイプIDとマッピング定義のアイテムタイプIDが一致) then (一致)
+                                    :pass;
+                                else (不一致)
+                                    :エラー;
+                                    end
+                                endif
+                            else (存在しない)
+                                :エラー;
+                                end
+                            endif
+                        endif
+                        if (アイテムタイプIDに該当するアイテムタイプが存在) then (存在する)
+                            :マッピング処理;
+                            if (マッピング処理に成功) then (成功)
+                                if (アイテムのステータスが"new") then ("new")
+                                    if (登録方式がワークフロー) then (ワークフロー)
+                                        if (フォーマット) then ("OTHERS"以外)
+                                            :アクティビティを作成;
+                                            if (アクティビティの作成に成功) then (成功)
+                                                :ステータスドキュメントを返却;
+                                            else (失敗)
+                                                :エラー;
+                                                end
+                                            endif
+                                        else ("OTHERS")
+                                            :アクティビティを作成;
+                                            if (アクティビティの作成に成功) then (成功)
+                                                :ステータスドキュメントを返却;
+                                            else (失敗)
+                                                :エラー;
+                                                end
+                                            endif
+                                        endif
+                                    else (直接)
+                                        :登録処理;
+                                        if (登録処理に成功) then (成功)
+                                            :ステータスドキュメントを返却;
+                                        else (失敗)
+                                            :エラー;
+                                            end
+                                        endif
+                                    endif
+                                else ("new"以外)
+                                    :エラー;
+                                    end
+                                endif
+                            else (失敗)
+                                :エラー;
+                                end
+                            endif
+                        else (存在しない)
+                            :エラー;
+                            end
+                        endif
+                    else (失敗)
+                        :エラー;
+                        end
+                    endif
+                else (揃っていない)
+                    :エラー;
+                    end
+                endif
+            else (含まれない)
+                :エラー;
+                end
+            endif
+        else (失敗)
+            :エラー;
+            end
+        endif
+    else (不一致)
+        :エラー;
+        end
+    endif
+else ("OTHERS")
+    :TSV or XMLの処理;
+endif
+stop
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+
+' title フロー図: check_bagit_import_items
+
+!pragma useVerticalIf on
+start
+:On-Behalf-Ofヘッダのチェック;
+:必須ファイルの存在チェック;
+switch (必須ファイルが揃っている)
+case (No)
+    :エラーを返す;
+    end
+case (Yes)
+    :アクセストークンからマッピング定義と登録方式を取得;
+    switch (マッピング定義が存在する)
+    case (No)
+        :エラーを返す;
+        end
+    case (Yes)
+        switch (登録方式)
+        case ("直接")
+        case ("ワークフロー")
+            :ワークフローを取得;
+            switch (ワークフローが存在する)
+            case (No)
+                :エラーを返す;
+                end
+            case (Yes)
+                switch (アイテムタイプIDがワークフローとマッピング定義で一致)
+                case (No)
+                    :エラーを返す;
+                    end
+                case (Yes)
+                endswitch
+            endswitch
+        endswitch
+        :アイテムタイプを取得;
+        switch (アイテムタイプが存在する)
+        case (No)
+            :エラーを返す;
+            end
+        case (Yes)
+            :マッピング処理;
+            :以降の処理;
+            stop
+@enduml
