@@ -102,7 +102,7 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 | Content-Length      | ○   | リクエストボディに付加したファイルサイズを指定する。<br/>※現在は指定していなくてもエラーとならない。                                                                                                                                                                                  | 1024000                                                                                                                                      |
 | Content-Type        | ○   | リクエストボディにファイルを付加するため multipart/form-data を指定する。                                                                                                                                                                                                              | multipart/form-data; boundary=xxxxxxxx                                                                                                       |
 | Packaging           | ○   | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | “http://purl.org/net/sword/3.0/package/SimpleZip”                                                                                          |
-| Digest              | △   | リクエストボディに付加したファイルのハッシュ値を指定する。<br/>ダイジェスト検証設定([設定値:17](#17-weko_swordserver_servicedocument_digest_verification--true))が有効の場合、BugIt形式のファイルを登録するときに必須。                                                                                                                                  | "SHA-256=a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b56c86b3e0aeea5f1"                                                                   |
+| Digest              | △   | リクエストボディに付加したファイルのハッシュ値を指定する。<br/>ダイジェスト検証設定([設定値:17](#conf17))が有効の場合、BugIt形式のファイルを登録するときに必須。                                                                                                                                  | "SHA-256=a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b56c86b3e0aeea5f1"                                                                   |
 
 ##### ボディ
 
@@ -138,22 +138,22 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 
 #### WEKO3側
 1. リクエストをチェックする
-    - **`Authorization`ヘッダー**に記載されたアクセストークンを使用しユーザーを認証する。  
+    - **`Authorization`** ヘッダーに記載されたアクセストークンを使用しユーザーを認証する。  
       アクセストークンのScopeを確認し、`deposit:write`が与えられていなければエラーとする。
-    - **`On-Behalf-Of`ヘッダー**が存在する場合、`On-Behalf-Of`許容設定([設定値:15](#15-weko_swordserver_servicedocument_on_behalf_of--true))が無効であればエラーとする。
-    - **`Content-Length`ヘッダー**およびファイルサイズを検証する。  
-      ファイルサイズ検証設定（[設定値:20](#20-weko_swordserver_servicedocument_content_length--false)）が有効であれば、`Content-Length`ヘッダーが不正な場合エラーとする。  
-      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（[設定値:21](#21-weko_swordserver_servicedocument_max_upload_size--16777216000)）を上回っていればえエラーとする。
-    - **`Content-Type`ヘッダー**を検証する。  
+    - **`On-Behalf-Of`** ヘッダーが存在する場合、`On-Behalf-Of`許容設定([設定値:15](#conf15))が無効であればエラーとする。
+    - **`Content-Length`** ヘッダーおよびファイルサイズを検証する。  
+      ファイルサイズ検証設定（[設定値:20](#conf20)）が有効であれば、`Content-Length`ヘッダーが不正な場合エラーとする。  
+      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（[設定値:21](#conf21)）を上回っていればえエラーとする。
+    - **`Content-Type`** ヘッダーを検証する。  
       現在の実装では、ヘッダーがなくてもエラーとならない。
-    - **`Content-Disposition`ヘッダー**を解析する。  
+    - **`Content-Disposition`** ヘッダーを解析する。  
       値が`attachment`かつオプションにファイル名が指定されているかを確認し、満たさない場合はエラーとする。
-    - **`Content-Type`ヘッダー**をもとに送付されたファイルを検証する。  
+    - **`Content-Type`** ヘッダーをもとに送付されたファイルを検証する。  
       ヘッダーの値が`application/zip`でなければ、エラーとする。  
       ファイルの有無や上記のファイル名の合致を確認し、問題があればエラーとする。
-    - **`Packaging`ヘッダー**を検証する。  
+    - **`Packaging`** ヘッダーを検証する。  
       メタデータのファイル形式が、TSV/CSV、XML、JSON-LD（RO-Crate+BagIt あるいは SWORDBagIt）のいずれかであることを判定する。
-    - メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:17](#17-weko_swordserver_servicedocument_digest_verification--true)）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
+    - メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:17](#conf17)）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
 
     ※ SWORD APIでは使用可能なエラータイプが定められているため、適切なエラータイプが存在しない場合はBadRequest(エラーコード400)とし、エラードキュメントにエラー原因を記述し返却する。
 
@@ -296,7 +296,7 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False
     ```
 
-15. 他のユーザーに代わっての登録(仲介)をサポートするか
+15. 他のユーザーに代わっての登録(仲介)をサポートするか<span id="conf15"></span>
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True
@@ -308,7 +308,7 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]
     ```
 
-17. クライアントにダイジェストを送信することを要求するか
+17. クライアントにダイジェストを送信することを要求するか<span id="conf17"></span>
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True
@@ -326,13 +326,13 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []
     ```
 
-20. リクエストに Content-Length ヘッダーを要求するか
+20. リクエストに Content-Length ヘッダーを要求するか<span id="conf20"></span>
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False
     ```
 
-21. セグメント化アップロードの合計サイズの最大サイズ (整数) (バイト単位)
+21. セグメント化アップロードの合計サイズの最大サイズ (整数) (バイト単位)<span id="conf21"></span>
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000
@@ -350,9 +350,6 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000
     ```
 
-    - `Direct` (1): Direct registration.
-    - `Workfolw` (2): Workflow registration.
-
 24. セグメント化されたアップロードがサポートされている場合、サーバーが単一のセグメント化されたアップロードで受け入れるセグメントの最大数
 
     ```python
@@ -364,6 +361,9 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     ```python
     WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType
     ```
+
+    - `Direct` (1): Direct registration.
+    - `Workfolw` (2): Workflow registration.
 
 26. RO-Crate+BagItのメタデータファイル名
 
