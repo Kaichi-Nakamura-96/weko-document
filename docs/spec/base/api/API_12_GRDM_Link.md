@@ -368,13 +368,13 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 26. RO-Crate+BagItのメタデータファイル名
 
     ```python
-    WEKO_SWORDSERVER_METADATA_FILE_ROCRATE = ["manifest-sha256.txt", "ro-crate-metadata.json"]
+    WEKO_SWORDSERVER_METADATA_FILE_ROCRATE = "ro-crate-metadata.json"
     ```
 
 27. SWORDBagItのメタデータファイル名
 
     ```python
-    WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = ["manifest-sha256.txt", "metadata/sword.json"]
+    WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = "metadata/sword.json"
     ```
 
 28. データセット識別子に付与するプレフィックス
