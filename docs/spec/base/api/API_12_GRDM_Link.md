@@ -185,7 +185,7 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
     - マッピング定義に基づいてメタデータのマッピングを行う
     - `On-Behalf-Of`ヘッダーが存在する場合、取得しアイテムのコントリビュータ情報とする。
 
-5. 登録処理を行う
+4. 登録処理を行う
 
     メタデータのファイル形式と登録方式によって処理を分岐する。  
     TSV/CSV形式の場合は直接登録、XML形式およびJSON-LD形式の場合はワークフロー登録に固定される。  
@@ -206,68 +206,191 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@cra
 
 ## 現在の設定値
 
-#### 1. `WEKO_SWORDSERVER_DEFAULT_VALUE = "foobar"`
+1. アプリケーションのデフォルト値
 
-#### 2. `WEKO_SWORDSERVER_BASE_TEMPLATE = "weko_swordserver/base.html"`
+    ```python
+    WEKO_SWORDSERVER_DEFAULT_VALUE = "foobar"
+    ```
 
-#### 3. `WEKO_SWORDSERVER_SWORD_VERSION = "http://purl.org/net/sword/3.0"`
+2. デモページのデフォルトの基本テンプレート
 
-#### 4. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ABSTRACT = ""`
+    ```python
+    WEKO_SWORDSERVER_BASE_TEMPLATE = "weko_swordserver/base.html"
+    ```
 
-#### 5. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT = ["*/*"]`
+3. サーバーがサポートするSWORDプロトコルのバージョン
 
-#### 6. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ["application/zip"]`
+    ```python
+    WEKO_SWORDSERVER_SWORD_VERSION = "http://purl.org/net/sword/3.0"
+    ```
 
-#### 7.` WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True`
+4. サービスの説明
 
-#### 8. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = []`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ABSTRACT = ""
+    ```
 
-#### 9. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_PACKAGING = ["*"]`
-    List of Packaging Formats which are acceptable to the server.
-        ["*"] or List of Packaging Formats URI
-            - http://purl.org/net/sword/3.0/package/Binary
-            - http://purl.org/net/sword/3.0/package/SimpleZip
-            - http://purl.org/net/sword/3.0/package/SWORDBagIt
+5. サーバーが受け入れられるコンテンツタイプのリスト
 
-#### 10.` WEKO_SWORDSERVER_SERVICEDOCUMENT_COLLECTION_POLICY = {}`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT = ["*/*"]
+    ```
 
-#### 11.` WEKO_SWORDSERVER_SERVICEDOCUMENT_TREATMENT = {}`
+6. サーバーが解凍できるアーカイブ形式のリスト
 
-#### 12. `WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING = ""`
+    サーバーが異なるフォーマットでパッケージを送信した場合、サーバーはそれをバイナリファイルとして扱うことができる。  
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ["application/zip"]
+    ```
 
-#### 13. `WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING_MAX_IDLE = 3600`
+7. ファイルの登録を受け付けるかどうか
 
-#### 14. `WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True
+    ```
 
-#### 15. `WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True`
+8. サーバーが受け入れられるメタデータ形式のリスト
 
-#### 16. `WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = []
+    ```
 
-#### 17. `WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True`
+9. サーバーで受け入れられるパッケージ形式のリスト
 
-#### 18. `WEKO_SWORDSERVER_SERVICEDOCUMENT_AUTHENTICATION = ["OAuth"]`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_PACKAGING = ["*"]
+    ```
 
-#### 19. `WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []`
+    ["*"] or List of Packaging Formats URI
+    - http://purl.org/net/sword/3.0/package/Binary
+    - http://purl.org/net/sword/3.0/package/SimpleZip
+    - http://purl.org/net/sword/3.0/package/SWORDBagIt
 
-#### 20. `WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False`
+10. サーバーの収集ポリシーのURLと説明
 
-#### 21. `WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_COLLECTION_POLICY = {}
+    ```
 
-#### 22. `WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_BY_REFERENCE_SIZE = 30000000000000000`
+11. 登録時に期待できる処理内容のURLと説明
 
-#### 23. `WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_TREATMENT = {}
+    ```
 
-#### 24. `WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_SEGMENTS = 1000`
+12. セグメント化されたアップロードの場合、クライアントが預け入れ前にコンテンツをステージアップできるURL
 
-#### 25. `WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING = ""
+    ```
 
-#### 26. `WEKO_SWORDSERVER_REQUIRED_FILES_ROCRATE = ["manifest-sha256.txt", "ro-crate-metadata.json"]`
+13. 最後にコンテンツを受信して​​から、サーバーが不完全な分割ファイルのアップロードを削除するまで保持する最小時間
 
-#### 27. `WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = ["manifest-sha256.txt", "metadata/sword.json"]`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING_MAX_IDLE = 3600
+    ```
 
-#### 28. `WEKO_SWORDSERVER_DATASET_PLEFIX = "weko-"`
+14. 参照によるデポジットをサポートするか
 
-#### 29. `WEKO_SWORDSERVER_DATASET_IDENTIFIER = {"": "./", "enc": base64.b64encode(f"{WEKO_SWORDSERVER_DATASET_PLEFIX}./".encode("utf-8")).decode("utf-8")}`
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False
+    ```
+
+15. 他のユーザーに代わっての登録(仲介)をサポートするか
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True
+    ```
+
+16. サーバーが受け入れるダイジェスト形式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]
+    ```
+
+17. クライアントにダイジェストを送信することを要求するか
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True
+    ```
+
+18. サポートする認証方式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_AUTHENTICATION = ["OAuth"]
+    ```
+
+19. 親サービスに含まれるサービスのリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []
+    ```
+
+20. リクエストに Content-Length ヘッダーを要求するか
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False
+    ```
+
+21. セグメント化アップロードの合計サイズの最大サイズ (整数) (バイト単位)
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000
+    ```
+
+22. 参照によってアップロードされたファイルの最大サイズ (バイト単位)
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_BY_REFERENCE_SIZE = 30000000000000000
+    ```
+
+23. アップロードされるファイルの最大サイズ (整数) (バイト単位)
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000
+    ```
+
+    - `Direct` (1): Direct registration.
+    - `Workfolw` (2): Workflow registration.
+
+24. セグメント化されたアップロードがサポートされている場合、サーバーが単一のセグメント化されたアップロードで受け入れるセグメントの最大数
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_SEGMENTS = 1000
+    ```
+
+25. 登録方式の列挙型クラス
+
+    ```python
+    WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType
+    ```
+
+26. RO-Crate+BagItのメタデータファイル名
+
+    ```python
+    WEKO_SWORDSERVER_METADATA_FILE_ROCRATE = ["manifest-sha256.txt", "ro-crate-metadata.json"]
+    ```
+
+27. SWORDBagItのメタデータファイル名
+
+    ```python
+    WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = ["manifest-sha256.txt", "metadata/sword.json"]
+    ```
+
+28. データセット識別子に付与するプレフィックス
+
+    ```python
+    WEKO_SWORDSERVER_DATASET_PREFIX = "weko-"
+    ```
+
+29. データセット識別子の置換設定
+
+    ```python
+    WEKO_SWORDSERVER_DATASET_IDENTIFIER = {
+        "": "./",
+        "enc": base64.b64encode(f"{WEKO_SWORDSERVER_DATASET_PREFIX}./".encode("utf-8")).decode("utf-8")
+    }
+    ```
 
 
 ---
