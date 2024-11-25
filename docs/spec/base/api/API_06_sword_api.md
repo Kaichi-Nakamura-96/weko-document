@@ -10,7 +10,7 @@
 - [エラータイプ](#エラータイプ)
 - [関連モジュール](#関連モジュール)
 - [処理概要](#処理概要)
-- [現在の設定値](#現在の設定値)
+- [サーバー設定値](#サーバー設定値)
 
 ## 目的・用途
 
@@ -200,42 +200,21 @@ curl -X DELETE https://192.168.56.101/sword/deposit/1 -H "Authorization:Bearer D
 
 ## 利用可能なロール
 
-<table>
-<thead>
-<tr class="header">
-<th>ロール</th>
-<th>システム<br />
-管理者</th>
-<th>リポジトリ<br />
-管理者</th>
-<th>コミュニティ<br />
-管理者</th>
-<th>登録ユーザー</th>
-<th>一般ユーザー</th>
-<th>ゲスト<br />
-(未ログイン)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>利用可否</td>
-<td>○</td>
-<td>○</td>
-<td>○</td>
-<td>○</td>
-<td>○</td>
-<td>×</td>
-</tr>
-</tbody>
-</table>
+|  ロール  | システム管理者 | リポジトリ管理者 | コミュニティ管理者 | 登録ユーザー | 一般ユーザー | ゲスト(未ログイン) |
+| -------- | -------------- | ---------------- | ------------------ | ------------ | ------------ | ------------------ |
+| 利用可否 |       〇       |        〇        |         〇         |      〇      |      〇      |        ×          |
+
 
 ## 機能内容
 
-  - 各APIへのリクエストに応じて処理を実行しレスポンスを返す
-      - OAuthアクセストークンによるユーザー認証を必須とする
+- 各APIへのリクエストに応じて処理を実行しレスポンスを返す
+    - OAuthアクセストークンによるユーザー認証を必須とする
 
-  - アイテム登録機能で登録に使用するZIPファイルはインポートで使用するものと同様の形式のみ使用できる。
-      - TSV/CSV形式のメタデータを含むZIPファイルの詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
+- アイテム登録機能で登録に使用するZIPファイルは、メタデータのファイルがTSV/CSV形式、XML形式、あるいはJSON-LD形式である必要がある。
+    - TSV/CSV形式のメタデータを含むZIPファイルの詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
+    - JSON-LD形式のメタデータを含むZIPファイルは、RO-Crate+BagItまたはSWORDBagItに準拠したZIPファイルである必要がある。
+
+- アイテム登録機能では、メタデータのファイルがXMLおよびJSON-LD形式である場合、メタデータをアイテムタイプへマッピングする。
 
 ## API仕様
 
@@ -258,10 +237,10 @@ GET /sword/service-document
 | ------ | -------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | 200    | サービスドキュメント | サーバーのサービスドキュメントを返す。                                                                                |
 | 400    | エラードキュメント   | リクエスト内容に何らかの不備がある場合。                                                                              |
-| 401    |                      | リクエストでAuthorization ヘッダーが提供されない場合。                                                                |
-| 403    |                      | 認証に失敗した場合。                                                                                                  |
-| 412    |                      | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーが提供された場合。 |
-| 500    |                      | サーバー内部エラーが発生した場合。                                                                                    |
+| 401    | エラードキュメント   | リクエストでAuthorization ヘッダーが提供されない場合。                                                                |
+| 403    | エラードキュメント   | 認証に失敗した場合。                                                                                                  |
+| 412    | エラードキュメント   | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーが提供された場合。 |
+| 500    | エラードキュメント   | サーバー内部エラーが発生した場合。                                                                                    |
 
 
 ### アイテム登録機能：POST /sword/service-document
@@ -277,10 +256,10 @@ POST /sword/service-document
 | Authorization       | ○     | 操作するWEKOユーザーのOAuth認証情報。アクセストークンを用いる。<br/>"Bearer" + " (半角スペース)" + "トークン"の形式。                                                                                                                                                                  | "Bearer fVzaeTNY5PCHsNS3rZOARrYR7kPBl4"                                                                    |
 | On-Behalf-Of        | -      | 代理投稿ユーザーのメールアドレス、パーソナルアクセストークンまたはePPNが入る。                                                                                                                                                                                                         | パーソナルアクセストークン: <br>　　"e0Pke8qpzEkkGjPE1RoSqNw7qu3tH4..."<br>ePPN: "sample@sampleuniv.ac.jp" |
 | Content-Disposition | ○     | リクエストボディに付加したファイルのファイル名を指定する。                                                                                                                                                                                                                             | "attachment; filename=example.zip"                                                                         |
-| Content-Length      | ※     | リクエストボディに付加したファイルサイズを指定する。<br/>※ファイルサイズ検証設定([設定値:20](#conf20))が有効の場合、必須。                                                                                                                                                            | 1024000                                                                                                    |
+| Content-Length      | ※     | リクエストボディに付加したファイルサイズを指定する。<br/>※ファイルサイズ検証設定([設定値:29](#conf29))が有効の場合、必須。                                                                                                                                                            | 1024000                                                                                                    |
 | Content-Type        | ○     | リクエストボディにファイルを付加するため "multipart/form-data" を指定する。                                                                                                                                                                                                            | multipart/form-data; boundary=xxxxxxxx                                                                     |
 | Packaging           | ○     | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | "http://purl.org/net/sword/3.0/package/SimpleZip"                                                          |
-| Digest              | ※     | ボディに付加したファイルのハッシュ値を指定する。<br/>※ダイジェスト検証設定([設定値:17](#conf17))が有効の場合、BugIt形式のファイルを登録するときに必須。                                                                                                                               | "SHA-256=e0Pke8qpzEkkGjPE1RoSqNw7qu3tH4..."                                                                |
+| Digest              | ※     | ボディに付加したファイルのハッシュ値を指定する。<br/>※ダイジェスト検証設定([設定値:28](#conf28))が有効の場合、メタデータのファイルがJSON-LD形式であるときに必須。                                                                                                                     | "SHA-256=e0Pke8qpzEkkGjPE1RoSqNw7qu3tH4..."                                                                |
 
 
 #### ボディ
@@ -319,7 +298,7 @@ GET /sword/deposit/\<recid\>
 
 #### パスパラメータ
 
-| キー        | 必須 | 説明                    |                      |
+| キー        | 必須 | 説明                    | 例                   |
 | ----------- | ---- | ----------------------- | -------------------- |
 | \<recid\>   | ○   | レコードID              | 20000021             |
 
@@ -352,7 +331,7 @@ DELETE /sword/deposit/\<recid\>
 
 #### パスパラメータ
 
-| キー        | 必須 | 説明                    |                      |
+| キー        | 必須 | 説明                    | 例                   |
 | ----------- | ---- | ----------------------- | -------------------- |
 | \<recid\>   | ○   | レコードID              | 20000021             |
 
@@ -375,181 +354,40 @@ DELETE /sword/deposit/\<recid\>
 ### サービスドキュメント
 サーバー全体の機能と操作パラメータを定義したドキュメント
 
-<table>
-<thead>
-<tr class="header">
-<th>項目</th>
-<th>型</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>@context</td>
-<td>string</td>
-<td>“https://swordapp.github.io/swordv3/swordv3.jsonld”を固定で出力。</td>
-</tr>
-<tr class="even">
-<td>@id</td>
-<td>string</td>
-<td>"[WEKO3のURL]/sword/service-document"を出力。</td>
-</tr>
-<tr class="odd">
-<td>@type</td>
-<td>string</td>
-<td>"ServiceDocument"を固定で出力。</td>
-</tr>
-<tr class="even">
-<td>accept</td>
-<td>array</td>
-<td>サーバーに受け入れられるコンテンツタイプのリスト。<br />
-”*/*”を出力する。</td>
-</tr>
-<tr class="odd">
-<td>acceptArchiveFormat</td>
-<td>array</td>
-<td>サーバーが解凍できるアーカイブ形式のリスト。<br />
-現状"application/zip"のみ対応。</td>
-</tr>
-<tr class="even">
-<td>acceptDeposits</td>
-<td>boolean</td>
-<td>サーバーがデポジットを受け入れるか否か。</td>
-</tr>
-<tr class="odd">
-<td>acceptMetadata</td>
-<td>array</td>
-<td>サーバーで受け入れ可能なメタデータ形式のリスト。<br />
-現状では出力内容にかかわらず、Metadataの受け入れには対応していない。</td>
-</tr>
-<tr class="even">
-<td>acceptPackaging</td>
-<td>array</td>
-<td>サーバーで受け入れ可能なパッケージ形式のリスト。<br />
-現状すべての形式を受け入れるが、アイテム登録はWEKOの一括登録用ZIP形式でのみ可能。</td>
-</tr>
-<tr class="odd">
-<td>authentication</td>
-<td>Array</td>
-<td>サーバーでサポートされている認証スキームのリスト。<br />
-現状”OAuth”のみ対応。</td>
-</tr>
-<tr class="even">
-<td>byReferenceDeposit</td>
-<td>boolean</td>
-<td>サーバーがbyReferenceDepositをサポートしているか否か。現状未対応のためFalseを出力。</td>
-</tr>
-<tr class="odd">
-<td>collectionPolicy</td>
-<td>object</td>
-<td>コレクションポリシーを示すオブジェクト。</td>
-</tr>
-<tr class="even">
-<td>collectionPolicy.@id</td>
-<td>string</td>
-<td>コレクションポリシーのURL。</td>
-</tr>
-<tr class="odd">
-<td>collectionPolicy.description</td>
-<td>string</td>
-<td>コレクションポリシーの説明。</td>
-</tr>
-<tr class="even">
-<td>dc:title</td>
-<td>string</td>
-<td>リポジトリの名称を出力。</td>
-</tr>
-<tr class="odd">
-<td>dcterms:abstract</td>
-<td>string</td>
-<td>リポジトリの説明。</td>
-</tr>
-<tr class="even">
-<td>digest</td>
-<td>array</td>
-<td>サーバーが受け入れるdigest形式のリスト。<br />
-現状digestの検証は未対応。</td>
-</tr>
-<tr class="odd">
-<td>maxAssembledSize</td>
-<td>integer</td>
-<td>Segmented File Upload時のファイル合計最大サイズ（単位：byte）。</td>
-</tr>
-<tr class="even">
-<td>maxByReferenceSize</td>
-<td>integer</td>
-<td>By-Reference Deposit時のファイル最大サイズ（単位：byte）。</td>
-</tr>
-<tr class="odd">
-<td>maxSegmentSize</td>
-<td>integer</td>
-<td>Segmented File Upload時の１ファイルの最大サイズ（単位：byte）。</td>
-</tr>
-<tr class="even">
-<td>maxSegments</td>
-<td>integer</td>
-<td>Segmented File Upload時のセグメントの最大数。</td>
-</tr>
-<tr class="odd">
-<td>maxUploadSize</td>
-<td>integer</td>
-<td>アップロードされるファイルの最大サイズ（単位：byte）。</td>
-</tr>
-<tr class="even">
-<td>minSegmentSize</td>
-<td>integer</td>
-<td>Segmented File Upload時の１ファイルの最小サイズ（単位：byte）。</td>
-</tr>
-<tr class="odd">
-<td>onBehalfOf</td>
-<td>boolean</td>
-<td>代理投稿をサポートしているか否か。<br />
-現状未対応のためfalseを出力。</td>
-</tr>
-<tr class="even">
-<td>root</td>
-<td>string</td>
-<td>サービスドキュメントのルートURL。</td>
-</tr>
-<tr class="odd">
-<td>services</td>
-<td>array</td>
-<td>親サービスに含まれるサービスのリスト。<br />
-現状未対応。</td>
-</tr>
-<tr class="even">
-<td>staging</td>
-<td>string</td>
-<td>Segmented File Upload時にコンテンツをステージング先URL。現状未対応のため空文字を出力。</td>
-</tr>
-<tr class="odd">
-<td>stagingMaxIdle</td>
-<td>integer</td>
-<td>ステージングされたファイルの最小保持時間。</td>
-</tr>
-<tr class="even">
-<td>treatment</td>
-<td>object</td>
-<td>デポジット時に期待される処理のURLと説明を示すオブジェクト。</td>
-</tr>
-<tr class="odd">
-<td>treatment.@id</td>
-<td>string</td>
-<td>処理のURL。</td>
-</tr>
-<tr class="even">
-<td>treatment.description</td>
-<td>string</td>
-<td>処理の説明。</td>
-</tr>
-<tr class="odd">
-<td>version</td>
-<td>string</td>
-<td>サポートしているSWORDバージョン。<br />
-"http://purl.org/net/sword/3.0"を出力。</td>
-</tr>
-</tbody>
-</table>
+| 項目                         | 型      | 説明                                                                                                                                                       |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| @context                     | string  | "https://swordapp.github.io/swordv3/swordv3.jsonld" を固定で出力。                                                                                        |
+| @id                          | string  | "[WEKO3のURL]/sword/service-document"を出力。                                                                                                              |
+| @type                        | string  | "ServiceDocument"を固定で出力。                                                                                                                            |
+| accept                       | array   | サーバーに受け入れられるコンテンツタイプのリスト。"\*/\*"を出力する。[設定値:5](#conf05)                                                                   |
+| acceptArchiveFormat          | array   | サーバーが解凍できるアーカイブ形式のリスト。現状"application/zip"のみ対応。[設定値:6](#conf06)                                                                                |
+| acceptDeposits               | boolean | サーバーがデポジットを受け入れるか否か。[設定値:7](#conf07)                                                                                                |
+| acceptMetadata               | array   | サーバーで受け入れ可能なメタデータ形式のリスト。[設定値:8](#conf08)                                                                                        |
+| acceptPackaging              | array   | サーバーで受け入れ可能なパッケージ形式のリスト。<br/>現状すべての形式を受け入れるが、アイテム登録はSimpleZip/SWORDBagIt形式でのみ可能。[設定値:9](#conf09) |
+| authentication               | Array   | サーバーでサポートされている認証スキームのリスト。現状”OAuth”のみ対応。[設定値:17](#conf17)                                                              |
+| byReferenceDeposit           | boolean | サーバーがbyReferenceDepositをサポートしているか否か。現状未対応のためFalseを出力。[設定値:14](#conf14)                                                    |
+| collectionPolicy             | object  | コレクションポリシーを示すオブジェクト。[設定値:10](#conf10)                                                                                               |
+| collectionPolicy.@id         | string  | コレクションポリシーのURL。                                                                                                                                |
+| collectionPolicy.description | string  | コレクションポリシーの説明。                                                                                                                               |
+| dc:title                     | string  | リポジトリの名称を出力。"WEKO3"を固定で出力。                                                                                                              |
+| dcterms:abstract             | string  | リポジトリの説明。未設定。[設定値:4](#conf04)                                                                                                              |
+| digest                       | array   | サーバーが受け入れるdigest形式のリスト。<br/>現状digestはメタデータのファイルがJSON-LD形式であるときのみ、SHA-256の検証が可能。[設定値:16](#conf16)        |
+| maxAssembledSize             | integer | Segmented File Upload時のファイル合計最大サイズ（単位：byte）。[設定値:21](#conf21)                                                                        |
+| maxByReferenceSize           | integer | By-Reference Deposit時のファイル最大サイズ（単位：byte）。[設定値:20](#conf20)                                                                             |
+| maxSegmentSize               | integer | Segmented File Upload時の１ファイルの最大サイズ（単位：byte）。<br/>現時点では出力していない。                                                             |
+| maxSegments                  | integer | Segmented File Upload時のセグメントの最大数。[設定値:22](#conf22)                                                                                          |
+| maxUploadSize                | integer | アップロードされるファイルの最大サイズ（単位：byte）。[設定値:19](#conf19)                                                                                 |
+| minSegmentSize               | integer | Segmented File Upload時の１ファイルの最小サイズ（単位：byte）。                                                                                            |
+| onBehalfOf                   | boolean | 代理投稿をサポートしているか否か。<br/>現状メタデータのファイルがJSON-LD形式であるときのみ対応している。[設定値:15](#conf15)                               |
+| root                         | string  | サービスドキュメントのルートURL。                                                                                                                          |
+| services                     | array   | 親サービスに含まれるサービスのリスト。現状未対応。[設定値:18](#conf18)                                                                                     |
+| staging                      | string  | Segmented File Upload時にコンテンツをステージング先URL。現状未対応のため空文字を出力。[設定値:12](#conf12)                                                 |
+| stagingMaxIdle               | integer | ステージングされたファイルの最小保持時間。[設定値:13](#conf13)                                                                                             |
+| treatment                    | object  | デポジット時に期待される処理のURLと説明を示すオブジェクト。[設定値:11](#conf11)                                                                            |
+| treatment.@id                | string  | 処理のURL。                                                                                                                                                |
+| treatment.description        | string  | 処理の説明。                                                                                                                                               |
+| version                      | string  | サポートしているSWORDバージョン。"http://purl.org/net/sword/3.0"を出力。[設定値:3](#conf03)                                                                |
+
 
 ### ステータスドキュメント
 アイテムの内容と現在の状態に関する詳細情報を示すドキュメント
@@ -858,16 +696,20 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 | ETagRequired                 | 412    | リクエストヘッダーにIf-Matchの値が指定されていない。                                         |
 | Forbidden                    | 403    | サーバーによって許可されていない操作をリクエストした。                                       |
 | FormatHeaderMismatch         | 415    | サーバーがサポートしていない形式のコンテンツがリクエストされた。                             |
-| InvalidSegmentSize           | 400    | セグメントアップロード時のファイルサイズが範囲外。                                           |
-| MaxAssembledSizeExceeded     | 400    | セグメントアップロード時の合計ファイルサイズが最大値を超えている。                           |
+| InvalidSegmentSize           | 400    | Segmented File Upload時のファイルサイズが範囲外。                                           |
+| MaxAssembledSizeExceeded     | 400    | Segmented File Upload時の合計ファイルサイズが最大値を超えている。                           |
 | MaxUploadSizeExceeded        | 413    | アップロードされたコンテンツサイズが最大値を超えている                                       |
 | MetadataFormatNotAcceptable  | 415    | サーバーがサポートしていない形式のMetadata-Formatがリクエストされた。                        |
 | MethodNotAllowed             | 405    | メソッドへのアクセスが許可されていない。                                                     |
 | OnBehalfOfNotAllowed         | 412    | サーバーが On-Behalf-Of をサポートしていない。                                               |
 | PackagingFormatNotAcceptable | 415    | サーバーがサポートしていない形式のPackagingフォーマットがリクエストされた。                  |
-| SegmentedUploadTimedOut      | 410    | セグメントアップロード先のURLにアクセスできない。                                            |
+| SegmentedUploadTimedOut      | 410    | Segmented File Upload先のURLにアクセスできない。                                            |
 | SegmentLimitExceeded         | 400    | セグメント数が最大値を超えている。                                                           |
 | UnexpectedSegment            | 400    | サーバーが予期していないセグメントを受信した。                                               |
+| **Additional ErrorType**     |        |                                                                                              |
+| NotFound                     | 404    | リクエストされたリソースが存在しない。                                                       |
+| ServerError                  | 500    | サーバー内部エラーが発生した。                                                               |
+
 
 ## 関連モジュール
 
@@ -882,8 +724,11 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 
   - weko\_search\_ui：インポート処理を実行する
 
+  - weko_workflow：ワークフロー経由でインポート処理を実行する
+
 
 ## 処理概要
+使用する設定値は[サーバー設定値](#サーバー設定値)、エラーメッセージは[エラーメッセージ](#エラーメッセージ)を参照。
 
 ### サービスドキュメント取得機能：GET /sword/service-document
 
@@ -894,22 +739,78 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 - サービスドキュメントを返却する
 
 ### アイテム登録機能：POST /sword/service-document
+#### GRDM側(想定)
+1. GRDMでインポート画面を表示する際、WEKOのAPIを使用しユーザーの選択可能な登録先を取得する
+2. GRDMでインポートするデータを指定し、パッケージ化する
+3. WEKOのエンドポイントPOST /sword/service-documentにパッケージを送信する  
+  この時、リクエストヘッダーにアクセストークンと登録先を付加する
 
-- リクエストをチェックする
-    - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
-    - 認証に使用されたOAuthトークンのScopeを確認する
-    - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-    - 送付されたファイルの有無を確認する
-    - ファイルサイズを確認する
-    - Content-Typeを確認する
-    - Packagingを確認する
-- ファイル内容に不備が無いかのチェックを行う
-- ファイル内のアイテムが新規登録か否かを確認する
-- インポート処理を行う
-- 登録したアイテムのステータスドキュメントを生成する
-    - インポート処理から返されたrecidからアイテム情報を取得する
-    - 取得したアイテム情報からステータスドキュメントを生成する
-- ステータスドキュメントを返却する
+#### WEKO3側
+1. リクエストをチェックする
+    - **`Authorization`** ヘッダーに記載されたアクセストークンを使用しユーザーを認証する。  
+      アクセストークンのScopeを確認し、`deposit:write`が与えられていなければエラーとする。
+    - **`On-Behalf-Of`** ヘッダーが存在する場合、`On-Behalf-Of`許容設定([設定値:15](#conf15))が無効であればエラーとする。
+    - **`Content-Length`** ヘッダーおよびファイルサイズを検証する。  
+      ファイルサイズ検証設定（[設定値:29](#conf29)）が有効であれば、`Content-Length`ヘッダーが不正な場合エラーとする。  
+      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（[設定値:19](#conf19)）を上回っていればえエラーとする。
+    - **`Content-Type`** ヘッダーを検証する。  
+      現在の実装では、ヘッダーがなくてもエラーとならない。
+    - **`Content-Disposition`** ヘッダーを解析する。  
+      値が`attachment`かつオプションにファイル名が指定されているかを確認し、満たさない場合はエラーとする。
+    - **`Content-Type`** ヘッダーをもとに送付されたファイルを検証する。  
+      ヘッダーの値が`application/zip`でなければ、エラーとする。  
+      ファイルの有無や上記のファイル名の合致を確認し、問題があればエラーとする。
+    - **`Packaging`** ヘッダーを検証する。  
+      メタデータのファイル形式が、TSV/CSV、XML、JSON-LD（RO-Crate+BagIt あるいは SWORDBagIt）のいずれかであることを判定する。
+    - **`Digest`** ヘッダーを検証する。  
+      メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:28](#conf28)）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
+
+    ※ SWORD APIでは使用可能なエラータイプが定められているため、適切なエラータイプが存在しない場合はBadRequest(エラーコード400)とし、エラードキュメントにエラー原因を記述し返却する。
+
+2. ファイル内容に不備が無いかのチェックを行う
+
+    Zipファイルを展開し、必要なファイルが含まれているか確認する。メタデータファイル形式によって必須事項が異なる。
+
+    **TSV/CSV形式**
+    - TSV/CSVファイルが含まれていなければエラーとする。
+
+    **XML形式**
+    - XMLファイルが含まれていなければエラーとする。
+
+    **JSON-LD形式**
+    - JSON-LDファイルが含まれていなければエラーとする。  
+        ファイル名は、RO-Crate+BagIt形式の場合は`ro-crate-metadata.json`、SWORDBagIt形式の場合は`metadata/sword.json`とする。
+    - 登録対象のファイルそれぞれのハッシュ値が`manifest-sha256.txt` に記載されている値と一致しなければエラーとなる。
+
+3. 登録の前処理を行う
+
+   メタデータファイル形式がXMLおよびJSON-LDであれば、メタデータのマッピングを行う。
+
+    **XML形式**
+    - メタデータのマッピングを行う
+
+    **JSON-LD形式**
+    - アクセストークンから、マッピング定義、マッピング先アイテムタイプ、登録方式を取得する  
+        マッピング定義またはマッピング先のアイテムタイプが存在しない場合はエラーとする
+    - マッピング定義に基づいてメタデータのマッピングを行う
+    - `On-Behalf-Of`ヘッダーが存在する場合、取得しアイテムのコントリビュータ情報とする。
+
+4. 登録処理を行う
+
+    メタデータのファイル形式と登録方式によって処理を分岐する。  
+    TSV/CSV形式の場合は直接登録、XML形式およびJSON-LD形式の場合はワークフロー登録に固定される。  
+    一方、RO-Crate+BagIt形式およびSWORDBagIt形式のZIPファイルの場合は、連携設定から取得した登録方式に従う。
+
+    **TSV/CSV・JSON-LDで直接登録の場合**
+    - zip形式によるインポート機能を使用してインポート処理を行う。
+
+    **XML・JSON-LDでワークフロー登録の場合**
+    - 新しいワークフローを作成する。
+    - マッピングしたメタデータをもとにDBのテーブル「workflow_activity」のメタデータを更新し、承認前までデータの登録を行う。
+    - 承認不要のワークフローの場合はワークフローを最後まで実行し、承認が必要なワークフローの場合は承認の直前まで進める。
+    - 必須のメタデータが存在しない場合はエラーとし、どのメタデータが必須かJSON-LD形式で返却する。
+    - マッピング先が無いメタデータは不可視のテキストエリアに保存する。
+
 
 ### アイテム状態取得機能：GET /sword/deposit/\<recid\>
 
@@ -938,7 +839,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     /home/invenio/.virtualenvs/invenio/var/instance/data/tmp/weko_import_YYYYMMDDhhmmss
 
 
-## 現在の設定値
+## サーバー設定値
 
 1. アプリケーションのデフォルト値
 
@@ -952,145 +853,144 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     WEKO_SWORDSERVER_BASE_TEMPLATE = "weko_swordserver/base.html"
     ```
 
-3. サーバーがサポートするSWORDプロトコルのバージョン
+3. サーバーがサポートするSWORDプロトコルのバージョン<span id="conf03">
 
     ```python
     WEKO_SWORDSERVER_SWORD_VERSION = "http://purl.org/net/sword/3.0"
     ```
 
-4. サービスの説明
+4. サービスの説明<span id="conf04">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ABSTRACT = ""
     ```
 
-5. サーバーが受け入れられるコンテンツタイプのリスト
+5. サーバーが受け入れられるコンテンツタイプのリスト<span id="conf05">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT = ["*/*"]
     ```
 
-6. サーバーが解凍できるアーカイブ形式のリスト
+6. サーバーが解凍できるアーカイブ形式のリスト<span id="conf06">
 
     サーバーが異なるフォーマットでパッケージを送信した場合、サーバーはそれをバイナリファイルとして扱うことができる。  
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ["application/zip"]
     ```
 
-7. ファイルの登録を受け付けるかどうか
+7. ファイルの登録を受け付けるかどうか<span id="conf07)>
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True
     ```
 
-8. サーバーが受け入れられるメタデータ形式のリスト
+8. サーバーが受け入れられるメタデータ形式のリスト<span id="conf08">
 
     ```python
-    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = []
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = [
+        "https://github.com/JPCOAR/schema/blob/master/2.0/jpcoar_scm.xsd",
+        "https://w3id.org/ro/crate/1.1/",
+    ]
     ```
 
-9. サーバーで受け入れられるパッケージ形式のリスト
+9. サーバーで受け入れられるパッケージ形式のリスト<span id="conf09">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_PACKAGING = ["*"]
-    ```
-
+    """
     ["*"] or List of Packaging Formats URI
     - http://purl.org/net/sword/3.0/package/Binary
     - http://purl.org/net/sword/3.0/package/SimpleZip
     - http://purl.org/net/sword/3.0/package/SWORDBagIt
+    """
+    ```
 
-10. サーバーの収集ポリシーのURLと説明
+10. サーバーの収集ポリシーのURLと説明<span id="conf10">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_COLLECTION_POLICY = {}
+    """
+    example:
+    {
+        "@id" : "http://www.myorg.ac.uk/collectionpolicy",
+        "description" : "...."
+    }
+    """
     ```
 
-11. 登録時に期待できる処理内容のURLと説明
+11. デポジット時に期待される処理のURLと説明を示すオブジェクト<span id="conf11">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_TREATMENT = {}
     ```
 
-12. セグメント化されたアップロードの場合、クライアントが預け入れ前にコンテンツをステージアップできるURL
+12. セSegmented File Upload時のステージング先URL<span id="conf12">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING = ""
     ```
 
-13. 最後にコンテンツを受信して​​から、サーバーが不完全な分割ファイルのアップロードを削除するまで保持する最小時間
+13. Segmented File Upload時のステージングしたファイルを保持する最小時間<span id="conf13">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING_MAX_IDLE = 3600
     ```
 
-14. 参照によるデポジットをサポートするか
+14. 参照によるデポジットをサポートするか<span id="conf14">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False
     ```
 
-15. 他のユーザーに代わっての登録(仲介)をサポートするか<span id="conf15"></span>
+15. 他のユーザーに代わっての代理投稿をサポートするか<span id="conf15">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True
     ```
 
-16. サーバーが受け入れるダイジェスト形式のリスト
+16. サーバーが受け入れるダイジェスト形式のリスト<span id="conf16">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]
     ```
 
-17. クライアントにダイジェストを送信することを要求するか<span id="conf17"></span>
-
-    ```python
-    WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True
-    ```
-
-18. サポートする認証方式のリスト
+17. サポートする認証方式のリスト<span id="conf17">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_AUTHENTICATION = ["OAuth"]
     ```
 
-19. 親サービスに含まれるサービスのリスト
+18. 親サービスに含まれるサービスのリスト<span id="conf18">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []
     ```
 
-20. リクエストに Content-Length ヘッダーを要求するか<span id="conf20"></span>
-
-    ```python
-    WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False
-    ```
-
-21. セグメント化アップロードの合計サイズの最大サイズ (整数) (バイト単位)<span id="conf21"></span>
+19. アップロードされるファイルの最大サイズ (整数) (バイト単位)<span id="conf19">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000
     ```
 
-22. 参照によってアップロードされたファイルの最大サイズ (バイト単位)
+20. 参照によってアップロードされたファイルの最大サイズ (バイト単位)<span id="conf20">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_BY_REFERENCE_SIZE = 30000000000000000
     ```
 
-23. アップロードされるファイルの最大サイズ (整数) (バイト単位)
+21. Segmented File Uploadの合計サイズの最大サイズ (整数) (バイト単位)<span id="conf21">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000
     ```
 
-24. セグメント化されたアップロードがサポートされている場合、サーバーが単一のセグメント化されたアップロードで受け入れるセグメントの最大数
+22. Segmented File Uploadがサポートされている場合、サーバーがひとつのアップロードで受け入れるセグメントの最大数<span id="conf22">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_SEGMENTS = 1000
     ```
 
-25. 登録方式の列挙型クラス
+23. 登録方式の列挙型クラス
 
     ```python
     WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType
@@ -1099,25 +999,25 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     - `Direct` (1): Direct registration.
     - `Workfolw` (2): Workflow registration.
 
-26. RO-Crate+BagItのメタデータファイル名
+24. RO-Crate+BagItのメタデータファイル名
 
     ```python
     WEKO_SWORDSERVER_METADATA_FILE_ROCRATE = "ro-crate-metadata.json"
     ```
 
-27. SWORDBagItのメタデータファイル名
+25. SWORDBagItのメタデータファイル名
 
     ```python
     WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = "metadata/sword.json"
     ```
 
-28. データセット識別子に付与するプレフィックス
+26. データセット識別子に付与するプレフィックス
 
     ```python
     WEKO_SWORDSERVER_DATASET_PREFIX = "weko-"
     ```
 
-29. データセット識別子の置換設定
+27. データセット識別子の置換設定
 
     ```python
     WEKO_SWORDSERVER_DATASET_IDENTIFIER = {
@@ -1126,6 +1026,17 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     }
     ```
 
+28. クライアントにダイジェストを送信することを要求するか<span id="conf28">
+
+    ```python
+    WEKO_SWORDSERVER_DIGEST_VERIFICATION = True
+    ```
+
+29. リクエストに Content-Length ヘッダーを要求するか<span id="conf29">
+
+    ```python
+    WEKO_SWORDSERVER_CONTENT_LENGTH = False
+    ```
 
 
 ## 更新履歴
