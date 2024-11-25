@@ -1,15 +1,26 @@
 # SWORD API
 
+### 目次
+- [目的・用途](#目的用途)
+- [利用方法](#利用方法)
+- [利用可能なロール](#利用可能なロール)
+- [機能内容](#機能内容)
+- [API仕様](#api仕様)
+- [ドキュメント仕様](#ドキュメント仕様)
+- [エラータイプ](#エラータイプ)
+- [関連モジュール](#関連モジュール)
+- [処理概要](#処理概要)
+- [現在の設定値](#現在の設定値)
+
 ## 目的・用途
 
-クライアントからSWORDv3プロトコルに従いリポジトリ上のアイテム操作を実現する。
+クライアントからSWORDv3プロトコルに従いリポジトリ上のアイテム操作を実現する。  
+アイテムを登録には、TSV/CSV、XML、あるいはJSON-LD形式のメタデータを含むZIPファイルを用いる。
 
 ## 利用方法
 
-APIの認証にはOAuth2を利用する。
-
-アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。  
-GakuNin RDMメタデータに対応したアイテム登録更新機能については[API-12:GRDM_Link](./API_12_GRDM_Link.md)を参照。
+APIの認証にはOAuth2を利用する。  
+アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。
 
 ### Scope：
 deposit: write
@@ -62,9 +73,23 @@ deposit: write
 <p>recidを指定してリポジトリ上に存在するアイテムのステータスドキュメントを取得する。</p>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>
 <p>4</p>
+</td>
+<td>
+<p>PUT /sword/deposit/&lt;recid&gt;</p>
+</td>
+<td>
+<p>
+recidを指定してリポジトリ上に存在するアイテムに対して、JSON-LD形式のメタデータで更新する。<br/>
+※現在は未実装
+</p>
+</td>
+</tr>
+<tr class="even">
+<td>
+<p>5</p>
 </td>
 <td>
 <p>DELETE /sword/deposit/&lt;recid&gt;</p>
@@ -142,7 +167,7 @@ $ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@imp
 ```
 
   - -F オプション
-      - multipart/form-data 形式で POSTするファイルを指定する
+      - POSTするファイルを指定する。自動的にContent-Typeは"multipart/form-data"となる
       - boundaryやContent-Lengthは自動で付加されるため自前で指定しなくてもよい
       - ファイル名の先頭には@を付加すること
       - ファイルのContent-Typeを"application/zip"とするため、ここでtypeを指定する（指定しないと application/octet-stream となってしまう）
@@ -210,533 +235,140 @@ curl -X DELETE https://192.168.56.101/sword/deposit/1 -H "Authorization:Bearer D
       - OAuthアクセストークンによるユーザー認証を必須とする
 
   - アイテム登録機能で登録に使用するZIPファイルはインポートで使用するものと同様の形式のみ使用できる。
-      - ZIPファイル形式の詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
+      - TSV/CSV形式のメタデータを含むZIPファイルの詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
 
 ## API仕様
 
 ### サービスドキュメント取得機能：GET /sword/service-document
+リポジトリのサービスドキュメントを取得する。
 
-<table>
-<thead>
-<tr class="header">
-<th>エンドポイント</th>
-<th>GET /sword/service-document</th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>概要</td>
-<td>リポジトリのサービスドキュメントを取得する。</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>リクエスト</td>
-<td>ヘッダー</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>ヘッダー</td>
-<td>必須</td>
-<td>説明</td>
-<td>例</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Authorization</td>
-<td>○</td>
-<td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
-<td>“Bearer xxxxxxx”</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>On-Behalf-Of</td>
-<td>-</td>
-<td>代理投稿ユーザーのメールアドレスを指定する。</td>
-<td>user@example.com</td>
-</tr>
-<tr class="even">
-<td>レスポンス</td>
-<td>コード</td>
-<td>ドキュメント</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>200</td>
-<td>サービスドキュメント</td>
-<td>サーバーのサービスドキュメントを返す。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>400</td>
-<td>エラードキュメント</td>
-<td>リクエスト内容に何らかの不備がある場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>401</td>
-<td></td>
-<td>リクエストでAuthorization ヘッダーが提供されない場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>403</td>
-<td></td>
-<td>認証に失敗した場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>412</td>
-<td></td>
-<td>サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、リクエストでOn-Behalf-Of ヘッダーが提供された場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>500</td>
-<td></td>
-<td>サーバー内部エラーが発生した場合。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+#### エンドポイント
+GET /sword/service-document
+
+#### リクエストヘッダー
+
+| ヘッダー      | 必須 | 説明                                                                                                                  | 例                                      |
+| ------------- | ---- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Authorization |  ○  | 操作するWEKOユーザーのOAuth認証情報。アクセストークンを用いる。<br/>"Bearer" + " (半角スペース)" + "トークン"の形式。 | "Bearer fVzaeTNY5PCHsNS3rZOARrYR7kPBl4" |
+| On-Behalf-Of  |  -   | 代理投稿ユーザーのメールアドレス、ePPNなどを指定する。                                                                |                                         |
+
+#### レスポンスコード
+
+| コード | ドキュメント         | 説明                                                                                                                  |
+| ------ | -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 200    | サービスドキュメント | サーバーのサービスドキュメントを返す。                                                                                |
+| 400    | エラードキュメント   | リクエスト内容に何らかの不備がある場合。                                                                              |
+| 401    |                      | リクエストでAuthorization ヘッダーが提供されない場合。                                                                |
+| 403    |                      | 認証に失敗した場合。                                                                                                  |
+| 412    |                      | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーが提供された場合。 |
+| 500    |                      | サーバー内部エラーが発生した場合。                                                                                    |
+
 
 ### アイテム登録機能：POST /sword/service-document
+一括登録用のZIPファイルを用いてアイテムを新規登録する。
 
-<table>
-<thead>
-<tr class="header">
-<th>エンドポイント</th>
-<th>POST /sword/service-document</th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>概要</td>
-<td>一括登録用のZIPファイルを用いてアイテムを新規登録する。</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>リクエスト</td>
-<td>ヘッダー</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>ヘッダー</td>
-<td>必須</td>
-<td>説明</td>
-<td>例</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Authorization</td>
-<td>○</td>
-<td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
-<td>“Bearer xxxxxxx”</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>On-Behalf-Of</td>
-<td>-</td>
-<td>代理投稿ユーザーのメールアドレスを指定する。</td>
-<td>“user@example.com”</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Content-Disposition</td>
-<td>○</td>
-<td>リクエストボディに付加したファイルのファイル名を指定する。</td>
-<td>“attachment; filename=example.zip”</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Content-Length</td>
-<td>○</td>
-<td>リクエストボディに付加したファイルサイズを指定する。</td>
-<td>1024000</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Content-Type</td>
-<td>○</td>
-<td>リクエストボディにファイルを付加するため multipart/form-data を指定する。</td>
-<td>multipart/form-data; boundary=xxxxxxxx</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Packaging</td>
-<td>○</td>
-<td>パッケージフォーマットと指定する。<br />
-SWORDでは以下の3つのパッケージフォーマットが定義されている。<br />
-http://purl.org/net/sword/3.0/package/Binary<br />
-http://purl.org/net/sword/3.0/package/SimpleZip<br />
-http://purl.org/net/sword/3.0/package/SWORDBagIt<br />
-※現在はSimpleZip形式のみ対応</td>
-<td>“http://purl.org/net/sword<br />
-/3.0/package/SimpleZip”</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>ボディ</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Key</td>
-<td>必須</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>file</td>
-<td>○</td>
-<td>form-data 形式でボディにZIPファイルを付加する。<br />
-ファイルのContent-Type には“application/zip”を指定すること。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>レスポンス</td>
-<td>コード</td>
-<td>ドキュメント</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>200</td>
-<td>ステータスドキュメント</td>
-<td>登録されたアイテムのステータスドキュメントを返す。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>400</td>
-<td>エラードキュメント</td>
-<td>リクエスト内容に何らかの不備がある場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>401</td>
-<td></td>
-<td>リクエストでAuthorization ヘッダーが提供されない場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>403</td>
-<td></td>
-<td>認証に失敗した場合。<br />
-認証したOAuthトークンが「deposit:write」スコープを持っていない場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>412</td>
-<td></td>
-<td>サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、リクエストでOn-Behalf-Of ヘッダーが提供された場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>413</td>
-<td></td>
-<td>送信されたファイルのサイズがサーバーに設定されたmaxUploadSizeを超えている場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>415</td>
-<td></td>
-<td>ヘッダーまたはボディに付加されたファイルのContent-Typeがサーバー側でサポートされていない場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>500</td>
-<td></td>
-<td>サーバー内部エラーが発生した場合。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+#### エンドポイント
+POST /sword/service-document
+
+#### リクエストヘッダー
+
+| フィールド          | 必須   | 説明                                                                                                                                                                                                                                                                                   | 例                                                                                                         |
+| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Authorization       | ○     | 操作するWEKOユーザーのOAuth認証情報。アクセストークンを用いる。<br/>"Bearer" + " (半角スペース)" + "トークン"の形式。                                                                                                                                                                  | "Bearer fVzaeTNY5PCHsNS3rZOARrYR7kPBl4"                                                                    |
+| On-Behalf-Of        | -      | 代理投稿ユーザーのメールアドレス、パーソナルアクセストークンまたはePPNが入る。                                                                                                                                                                                                         | パーソナルアクセストークン: <br>　　"e0Pke8qpzEkkGjPE1RoSqNw7qu3tH4..."<br>ePPN: "sample@sampleuniv.ac.jp" |
+| Content-Disposition | ○     | リクエストボディに付加したファイルのファイル名を指定する。                                                                                                                                                                                                                             | "attachment; filename=example.zip"                                                                         |
+| Content-Length      | ※     | リクエストボディに付加したファイルサイズを指定する。<br/>※ファイルサイズ検証設定([設定値:20](#conf20))が有効の場合、必須。                                                                                                                                                            | 1024000                                                                                                    |
+| Content-Type        | ○     | リクエストボディにファイルを付加するため "multipart/form-data" を指定する。                                                                                                                                                                                                            | multipart/form-data; boundary=xxxxxxxx                                                                     |
+| Packaging           | ○     | パッケージフォーマットと指定する。<br/>SWORDでは以下の3つのパッケージフォーマットが定義されている。<br/>http://purl.org/net/sword/3.0/package/Binary<br/>http://purl.org/net/sword/3.0/package/SimpleZip<br/>http://purl.org/net/sword/3.0/package/SWORDBagIt<br/>※現在Binaryは未対応 | "http://purl.org/net/sword/3.0/package/SimpleZip"                                                          |
+| Digest              | ※     | ボディに付加したファイルのハッシュ値を指定する。<br/>※ダイジェスト検証設定([設定値:17](#conf17))が有効の場合、BugIt形式のファイルを登録するときに必須。                                                                                                                               | "SHA-256=e0Pke8qpzEkkGjPE1RoSqNw7qu3tH4..."                                                                |
+
+
+#### ボディ
+
+| フィールド | 必須 | 説明                                                                                                               | 例                                                          |
+| ---------- | ---- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| file       | ○   | form-data 形式でボディにZIPファイルを付加する。<br/>ファイルのContent-Type には"application/zip"を指定すること。   | "file=@project/post_files/example.zip;type=application/zip" |
+
+#### レスポンスコード
+
+| コード | ドキュメント           | 説明                                                                                                                   |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 200    | ステータスドキュメント | 登録されたアイテムのステータスドキュメントを返す。                                                                     |
+| 400    | エラードキュメント     | リクエスト内容に何らかの不備がある場合。                                                                               |
+| 401    | エラードキュメント     | リクエストでAuthorization ヘッダーが提供されない場合。                                                                 |
+| 403    | エラードキュメント     | 認証に失敗した場合。<br/>認証したOAuthトークンが「deposit:write」スコープを持っていない場合。                          |
+| 404    | エラードキュメント     | 登録されたアイテムが見つからない場合。                                                                                 |
+| 412    | エラードキュメント     | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーーが提供された場合。|
+| 413    | エラードキュメント     | 送信されたファイルのサイズがサーバーに設定されたmaxUploadSizeを超えている場合。                                        |
+| 415    | エラードキュメント     | ヘッダーまたはボディに付加されたファイルのContent-Typeがサーバー側で<br/>サポートされていない場合。                    |
+| 500    | エラードキュメント     | サーバー内部エラーが発生した場合。                                                                                     |
+
 
 ### アイテム状態取得機能：GET /sword/deposit/\<recid\>
 
-<table>
-<thead>
-<tr class="header">
-<th>エンドポイント</th>
-<th>GET /sword/deposit/&lt;recid&gt;</th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>概要</td>
-<td>指定したアイテムのステータスドキュメントを取得する。</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>リクエスト</td>
-<td>ヘッダー</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>ヘッダー</td>
-<td>必須</td>
-<td>説明</td>
-<td>例</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Authorization</td>
-<td>○</td>
-<td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
-<td>“Bearer xxxxxxx”</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>On-Behalf-Of</td>
-<td>-</td>
-<td>代理投稿ユーザーのメールアドレスを指定する。</td>
-<td>“user@example.com”</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>パスパラメータ</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Key</td>
-<td>必須</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>&lt;recid&gt;</td>
-<td>○</td>
-<td>レコードID</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>レスポンス</td>
-<td>コード</td>
-<td>ドキュメント</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>200</td>
-<td>ステータスドキュメント</td>
-<td>指定されたアイテムのステータスドキュメントを返す。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>400</td>
-<td>エラードキュメント</td>
-<td>リクエスト内容に何らかの不備がある場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>401</td>
-<td></td>
-<td>リクエストでAuthorization ヘッダーが提供されない場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>403</td>
-<td></td>
-<td>認証に失敗した場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>404</td>
-<td></td>
-<td>指定したrecidに該当するアイテムが存在しない（削除されている）場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>412</td>
-<td></td>
-<td>サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、リクエストでOn-Behalf-Of ヘッダーが提供された場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>500</td>
-<td></td>
-<td>サーバー内部エラーが発生した場合。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+#### エンドポイント
+GET /sword/deposit/\<recid\>
+
+#### リクエストヘッダー
+
+| フィールド         | 必須 | 説明                                                                                                                  | 例                                      |
+| ------------------ | ---- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Authorization      | ○   | 操作するWEKOユーザーのOAuth認証情報。アクセストークンを用いる。<br/>"Bearer" + " (半角スペース)" + "トークン"の形式。 | "Bearer fVzaeTNY5PCHsNS3rZOARrYR7kPBl4" |
+| On-Behalf-Of       | -    | 操作するWEKOユーザーのOAuth認証情報。<br/>"Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する。         | "user@example.com"                      |
+
+
+#### パスパラメータ
+
+| キー        | 必須 | 説明                    |                      |
+| ----------- | ---- | ----------------------- | -------------------- |
+| \<recid\>   | ○   | レコードID              | 20000021             |
+
+
+#### レスポンスコード
+
+| コード | ドキュメント           | 説明                                                                                                                       |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 200    | ステータスドキュメント | 指定されたアイテムのステータスドキュメントを返す。                                                                         |
+| 400    | エラードキュメント     | リクエスト内容に何らかの不備がある場合。                                                                                   |
+| 401    | エラードキュメント     | リクエストでAuthorization ヘッダーが提供されない場合。                                                                     |
+| 403    | エラードキュメント     | 認証に失敗した場合。                                                                                                       |
+| 404    | エラードキュメント     | 指定したrecidに該当するアイテムが存在しない（削除されている）場合。                                                        |
+| 412    | エラードキュメント     | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーが提供された場合。      |
+| 500    | エラードキュメント     | サーバー内部エラーが発生した場合。                                                                                         |
+
 
 ### アイテム削除機能：DELETE /sword/deposit/\<recid\>
 
-<table>
-<thead>
-<tr class="header">
-<th>エンドポイント</th>
-<th>DELETE /sword/deposit/&lt;recid&gt;</th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>概要</td>
-<td>指定したアイテムを削除する。</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>リクエスト</td>
-<td>ヘッダー</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>ヘッダー</td>
-<td>必須</td>
-<td>説明</td>
-<td>例</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Authorization</td>
-<td>○</td>
-<td>操作するWEKOユーザーのOAuth認証情報。<br />
-“Bearer”+” (半角スペース)”+“アクセストークン”の形式で指定する。</td>
-<td>“Bearer xxxxxxx”</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>On-Behalf-Of</td>
-<td>-</td>
-<td>代理投稿ユーザーのメールアドレスを指定する。</td>
-<td>“user@example.com”</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>パスパラメータ</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Key</td>
-<td>必須</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>&lt;recid&gt;</td>
-<td>○</td>
-<td>レコードID</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>レスポンス</td>
-<td>コード</td>
-<td>ドキュメント</td>
-<td>説明</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>204</td>
-<td>なし</td>
-<td>空のレスポンスを返す。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>400</td>
-<td>エラードキュメント</td>
-<td>リクエスト内容に何らかの不備がある場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>401</td>
-<td></td>
-<td>リクエストでAuthorization ヘッダーが提供されない場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>403</td>
-<td></td>
-<td>認証に失敗した場合。</td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>412</td>
-<td></td>
-<td>サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、リクエストでOn-Behalf-Of ヘッダーが提供された場合。</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>500</td>
-<td></td>
-<td>サーバー内部エラーが発生した場合。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+#### エンドポイント
+DELETE /sword/deposit/\<recid\>
+
+#### リクエストヘッダー
+
+| フィールド         | 必須 | 説明                                                                                                                  | 例                                      |
+| ------------------ | ---- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Authorization      | ○   | 操作するWEKOユーザーのOAuth認証情報。アクセストークンを用いる。<br/>"Bearer" + " (半角スペース)" + "トークン"の形式。 | "Bearer fVzaeTNY5PCHsNS3rZOARrYR7kPBl4" |
+| On-Behalf-Of       | -    | 操作するWEKOユーザーのOAuth認証情報。<br/>"Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する。         | "user@example.com"                      |
+
+
+#### パスパラメータ
+
+| キー        | 必須 | 説明                    |                      |
+| ----------- | ---- | ----------------------- | -------------------- |
+| \<recid\>   | ○   | レコードID              | 20000021             |
+
+
+#### レスポンスコード
+
+| コード | ドキュメント           | 説明                                                                                                                       |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 204    | -                      | 空のレスポンスを返す。                                                                                                     |
+| 400    | エラードキュメント     | リクエスト内容に何らかの不備がある場合。                                                                                   |
+| 401    | エラードキュメント     | リクエストでAuthorization ヘッダーが提供されない場合。                                                                     |
+| 403    | エラードキュメント     | 認証に失敗した場合。                                                                                                       |
+| 404    | エラードキュメント     | 指定したrecidに該当するアイテムが存在しない（削除されている）場合。                                                        |
+| 412    | エラードキュメント     | サーバー側がOn-Behalf-Of をサポートしていないにもかかわらず、<br/>リクエストでOn-Behalf-Of ヘッダーが提供された場合。      |
+| 500    | エラードキュメント     | サーバー内部エラーが発生した場合。                                                                                         |
+
 
 ## ドキュメント仕様
 
@@ -1254,6 +886,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 ## 処理概要
 
 ### サービスドキュメント取得機能：GET /sword/service-document
+
 - リクエストをチェックする
     - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
     - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
@@ -1261,6 +894,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 - サービスドキュメントを返却する
 
 ### アイテム登録機能：POST /sword/service-document
+
 - リクエストをチェックする
     - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
     - 認証に使用されたOAuthトークンのScopeを確認する
@@ -1278,6 +912,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 - ステータスドキュメントを返却する
 
 ### アイテム状態取得機能：GET /sword/deposit/\<recid\>
+
 - リクエストをチェックする
     - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
     - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
@@ -1286,11 +921,211 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 - ステータスドキュメントを返却する
 
 ### アイテム削除機能：DELETE /sword/deposit/\<recid\>
+
 - リクエストをチェックする
     - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
     - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
 - 指定されたrecidを引数にsoft\_delete処理を実行する
 - 空のレスポンスを返却する
+
+### 処理に関するエトセトラ
+
+- zipファイルの展開に使用しているライブラリ：zipfile
+- ハッシュ値の計算に使用しているライブラリ：hashlib
+- Bagの整合性検証に使用しているライブラリ：[bagit](https://github.com/LibraryOfCongress/bagit-python/tree/v1.7.0)
+- アイテムをインポートする際に作成するテンポラリファイルは以下のように生成する
+
+    /home/invenio/.virtualenvs/invenio/var/instance/data/tmp/weko_import_YYYYMMDDhhmmss
+
+
+## 現在の設定値
+
+1. アプリケーションのデフォルト値
+
+    ```python
+    WEKO_SWORDSERVER_DEFAULT_VALUE = "foobar"
+    ```
+
+2. デモページのデフォルトの基本テンプレート
+
+    ```python
+    WEKO_SWORDSERVER_BASE_TEMPLATE = "weko_swordserver/base.html"
+    ```
+
+3. サーバーがサポートするSWORDプロトコルのバージョン
+
+    ```python
+    WEKO_SWORDSERVER_SWORD_VERSION = "http://purl.org/net/sword/3.0"
+    ```
+
+4. サービスの説明
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ABSTRACT = ""
+    ```
+
+5. サーバーが受け入れられるコンテンツタイプのリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT = ["*/*"]
+    ```
+
+6. サーバーが解凍できるアーカイブ形式のリスト
+
+    サーバーが異なるフォーマットでパッケージを送信した場合、サーバーはそれをバイナリファイルとして扱うことができる。  
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ["application/zip"]
+    ```
+
+7. ファイルの登録を受け付けるかどうか
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True
+    ```
+
+8. サーバーが受け入れられるメタデータ形式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_METADATA = []
+    ```
+
+9. サーバーで受け入れられるパッケージ形式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_PACKAGING = ["*"]
+    ```
+
+    ["*"] or List of Packaging Formats URI
+    - http://purl.org/net/sword/3.0/package/Binary
+    - http://purl.org/net/sword/3.0/package/SimpleZip
+    - http://purl.org/net/sword/3.0/package/SWORDBagIt
+
+10. サーバーの収集ポリシーのURLと説明
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_COLLECTION_POLICY = {}
+    ```
+
+11. 登録時に期待できる処理内容のURLと説明
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_TREATMENT = {}
+    ```
+
+12. セグメント化されたアップロードの場合、クライアントが預け入れ前にコンテンツをステージアップできるURL
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING = ""
+    ```
+
+13. 最後にコンテンツを受信して​​から、サーバーが不完全な分割ファイルのアップロードを削除するまで保持する最小時間
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_STAGING_MAX_IDLE = 3600
+    ```
+
+14. 参照によるデポジットをサポートするか
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_BY_REFERENCE_DEPOSIT = False
+    ```
+
+15. 他のユーザーに代わっての登録(仲介)をサポートするか<span id="conf15"></span>
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_ON_BEHALF_OF = True
+    ```
+
+16. サーバーが受け入れるダイジェスト形式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST = ["SHA-256", "SHA", "MD5"]
+    ```
+
+17. クライアントにダイジェストを送信することを要求するか<span id="conf17"></span>
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_DIGEST_VERIFICATION = True
+    ```
+
+18. サポートする認証方式のリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_AUTHENTICATION = ["OAuth"]
+    ```
+
+19. 親サービスに含まれるサービスのリスト
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_SERVICES = []
+    ```
+
+20. リクエストに Content-Length ヘッダーを要求するか<span id="conf20"></span>
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_CONTENT_LENGTH = False
+    ```
+
+21. セグメント化アップロードの合計サイズの最大サイズ (整数) (バイト単位)<span id="conf21"></span>
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_UPLOAD_SIZE = 16777216000
+    ```
+
+22. 参照によってアップロードされたファイルの最大サイズ (バイト単位)
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_BY_REFERENCE_SIZE = 30000000000000000
+    ```
+
+23. アップロードされるファイルの最大サイズ (整数) (バイト単位)
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_ASSEMBLED_SIZE = 30000000000000
+    ```
+
+24. セグメント化されたアップロードがサポートされている場合、サーバーが単一のセグメント化されたアップロードで受け入れるセグメントの最大数
+
+    ```python
+    WEKO_SWORDSERVER_SERVICEDOCUMENT_MAX_SEGMENTS = 1000
+    ```
+
+25. 登録方式の列挙型クラス
+
+    ```python
+    WEKO_SWORDSERVER_REGISTRATION_TYPE = SwordClientModel.RegistrationType
+    ```
+
+    - `Direct` (1): Direct registration.
+    - `Workfolw` (2): Workflow registration.
+
+26. RO-Crate+BagItのメタデータファイル名
+
+    ```python
+    WEKO_SWORDSERVER_METADATA_FILE_ROCRATE = "ro-crate-metadata.json"
+    ```
+
+27. SWORDBagItのメタデータファイル名
+
+    ```python
+    WEKO_SWORDSERVER_REQUIRED_FILES_SWORD = "metadata/sword.json"
+    ```
+
+28. データセット識別子に付与するプレフィックス
+
+    ```python
+    WEKO_SWORDSERVER_DATASET_PREFIX = "weko-"
+    ```
+
+29. データセット識別子の置換設定
+
+    ```python
+    WEKO_SWORDSERVER_DATASET_IDENTIFIER = {
+        "": "./",
+        "enc": base64.b64encode(f"{WEKO_SWORDSERVER_DATASET_PREFIX}./".encode("utf-8")).decode("utf-8")
+    }
+    ```
+
 
 
 ## 更新履歴
