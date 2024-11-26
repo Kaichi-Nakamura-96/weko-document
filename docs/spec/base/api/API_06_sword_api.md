@@ -10,7 +10,9 @@
 - [エラータイプ](#エラータイプ)
 - [関連モジュール](#関連モジュール)
 - [処理概要](#処理概要)
+- [エラーメッセージ](#エラーメッセージ)
 - [サーバー設定値](#サーバー設定値)
+- [更新履歴](#更新履歴)
 
 ## 目的・用途
 
@@ -27,88 +29,25 @@ deposit: write
 
 ### エンドポイント：
 
-<table>
-<thead>
-<tr class="header">
-<th>
-<p>項番</p>
-</th>
-<th>
-<p>HTTP request</p>
-</th>
-<th>
-<p>内容</p>
-</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>
-<p>1</p>
-</td>
-<td>
-<p>GET /sword/service-document</p>
-</td>
-<td>
-<p>リポジトリのサービスドキュメントを取得する。</p>
-</td>
-</tr>
-<tr class="even">
-<td>
-<p>2</p></td>
-<td><p>POST /sword/service-document</p>
-</td>
-<td>
-<p>WEKO3の一括登録フォーマットを用いて、アイテムを登録する。</p>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<p>3</p>
-</td>
-<td>
-<p>GET /sword/deposit/&lt;recid&gt;</p>
-</td>
-<td>
-<p>recidを指定してリポジトリ上に存在するアイテムのステータスドキュメントを取得する。</p>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<p>4</p>
-</td>
-<td>
-<p>PUT /sword/deposit/&lt;recid&gt;</p>
-</td>
-<td>
-<p>
-recidを指定してリポジトリ上に存在するアイテムに対して、JSON-LD形式のメタデータで更新する。<br/>
-※現在は未実装
-</p>
-</td>
-</tr>
-<tr class="even">
-<td>
-<p>5</p>
-</td>
-<td>
-<p>DELETE /sword/deposit/&lt;recid&gt;</p>
-</td>
-<td>
-<p>recidを指定してアイテムを削除する。</p>
-</td>
-</tr>
-</tbody>
-</table>
+| 項番 | HTTP request                  | 内容                                                                                                          |
+| ---- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
+|  1   | GET /sword/service-document   | リポジトリのサービスドキュメントを取得する。                                                                  |
+|  2   | POST /sword/service-document  | WEKO3の一括登録フォーマットを用いて、アイテムを登録する。                                                     |
+|  3   | GET /sword/deposit/<recid>    | recidを指定してリポジトリ上に存在するアイテムのステータスドキュメントを取得する。                             |
+|  4   | PUT /sword/deposit/<recid>    | recidを指定してリポジトリ上に存在するアイテムに対して、JSON-LD形式のメタデータで更新する。<br/>※現在は未実装 |
+|  5   | DELETE /sword/deposit/<recid> | recidを指定してアイテムを削除する。                                                                           |
+
 
 ### CURLでのリクエスト実行例：
 
 各APIのリクエスト仕様の詳細は後述。
 
 #### GET /sword/service-document
+##### リクエスト
 
-```
-$ curl -X GET https://192.168.56.101/sword/service-document -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo"
+```shell
+$ curl -X GET https://192.168.56.101/sword/service-document \
+    -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo"
 ```
 
   - -H オプション
@@ -116,12 +55,64 @@ $ curl -X GET https://192.168.56.101/sword/service-document -H "Authorization:Be
     - リクエストにカスタムヘッダーを追加する
     - Authorization は "Bearer" + " (半角スペース)" + "アクセストークン"の形式で指定する
 
+##### レスポンス
+
+```json
+{
+  "@context": "https://swordapp.github.io/swordv3/swordv3.jsonld",
+  "@id": "https://192.168.56.101/sword/service-document",
+  "@type": "ServiceDocument",
+  "accept": [
+    "*/*"
+  ],
+  "acceptArchiveFormat": [
+    "application/zip"
+  ],
+  "acceptDeposits": true,
+  "acceptMetadata": [
+    "https://github.com/JPCOAR/schema/blob/master/2.0/jpcoar_scm.xsd",
+    "https://w3id.org/ro/crate/1.1/"
+  ],
+  "acceptPackaging": [
+    "*"
+  ],
+  "authentication": [
+    "OAuth"
+  ],
+  "byReferenceDeposit": false,
+  "collectionPolicy": {},
+  "dc:title": "WEKO3",
+  "dcterms:abstract": "",
+  "digest": [
+    "SHA-256",
+    "SHA",
+    "MD5"
+  ],
+  "maxAssembledSize": 30000000000000,
+  "maxByReferenceSize": 30000000000000000,
+  "maxSegments": 1000,
+  "maxUploadSize": 16777216000,
+  "onBehalfOf": true,
+  "root": "https://192.168.56.101/sword/service-document",
+  "staging": "",
+  "stagingMaxIdle": 3600,
+  "treatment": {},
+  "version": "http://purl.org/net/sword/3.0"
+}
+```
 
 #### POST /sword/service-document
-レスポンスの例も示す。
+##### リクエスト
 
+```shell
+$ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@import.zip;type=application/zip" \
+    -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" \
+    -H "Content-Disposition:attachment; filename=import.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip"
 ```
-$ curl -X POST -s -k https://192.168.56.101/sword/service-document -F "file=@import.zip;type=application/zip" -H "Authorization:Bearer Dp85qdLJefoKZ9AuUeIVCqL0Zj9lHxulU1ZSqWGZKI0xJUfxA4wKFnWgztEo" -H "Content-Disposition:attachment; filename=import.zip" -H "Packaging:http://purl.org/net/sword/3.0/package/SimpleZip" | jq .
+
+##### レスポンス
+
+```json
 {
   "@context": "https://swordapp.github.io/swordv3/swordv3.jsonld",
   "@id": "https://192.168.56.101/sword/deposit/96568",
@@ -392,293 +383,60 @@ DELETE /sword/deposit/\<recid\>
 ### ステータスドキュメント
 アイテムの内容と現在の状態に関する詳細情報を示すドキュメント
 
-<table>
-<thead>
-<tr class="header">
-<th>項目</th>
-<th>型</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>@context</td>
-<td>string</td>
-<td>“https://swordapp.github.io/swordv3/swordv3.jsonld”を固定で出力。</td>
-</tr>
-<tr class="even">
-<td>@id</td>
-<td>string</td>
-<td>"[WEKO3のURL]/sword/deposit/[アイテムのrecid]"を出力。</td>
-</tr>
-<tr class="odd">
-<td>@type</td>
-<td>string</td>
-<td>"ServiceDocument"を固定で出力。</td>
-</tr>
-<tr class="even">
-<td>actions</td>
-<td>object</td>
-<td>アイテムに対してSWORDで使用可能なアクション。<br />
-現時点では deleteObject のみTrueを返し、それ以外はFalseを返すようになっている。</td>
-</tr>
-<tr class="odd">
-<td>actions. appendFiles</td>
-<td>boolean</td>
-<td>ファイル追加要求が発行可能か否か。</td>
-</tr>
-<tr class="even">
-<td>actions.appendMetadata</td>
-<td>boolean</td>
-<td>メタデータ追加要求が発行可能か否か。</td>
-</tr>
-<tr class="odd">
-<td>actions. deleteFiles</td>
-<td>boolean</td>
-<td>ファイル削除要求が発行可能か否か。</td>
-</tr>
-<tr class="even">
-<td>actions. deleteMetadata</td>
-<td>boolean</td>
-<td>メタデータ削除要求が発行可能か否か。</td>
-</tr>
-<tr class="odd">
-<td>actions. deleteObject</td>
-<td>boolean</td>
-<td>アイテム削除要求が発行可能か否か。</td>
-</tr>
-<tr class="even">
-<td>actions. getFiles</td>
-<td>boolean</td>
-<td>ファイル取得要求が発行可能か否か。</td>
-</tr>
-<tr class="odd">
-<td>actions. getMetadata</td>
-<td>boolean</td>
-<td>メタデータ取得要求が発行可能か否か。</td>
-</tr>
-<tr class="even">
-<td>actions. replaceFiles</td>
-<td>boolean</td>
-<td>ファイル置き換え要求が発行可能か否か。</td>
-</tr>
-<tr class="odd">
-<td>actions. replaceMetadata</td>
-<td>boolean</td>
-<td>メタデータ置き換え要求が発行可能か否か。</td>
-</tr>
-<tr class="even">
-<td>eTag</td>
-<td>string</td>
-<td>アイテムのeTag。<br />
-WEKOではアイテムのリビジョン番号を返す。</td>
-</tr>
-<tr class="odd">
-<td>fileSet</td>
-<td>object</td>
-<td>ファイルセットを示すオブジェクト。<br />
-現時点では空オブジェクトを返す。</td>
-</tr>
-<tr class="even">
-<td>fileSet.@id</td>
-<td>string</td>
-<td>ファイルセットのURL。</td>
-</tr>
-<tr class="odd">
-<td>fileSet.eTag</td>
-<td>string</td>
-<td>ファイルセットのeTag。</td>
-</tr>
-<tr class="even">
-<td>links</td>
-<td>array</td>
-<td>アイテムのリンクを示すオブジェクト。<br />
-現時点ではアイテム詳細ページのURLを出力する。またDOIやCNRIハンドルを持つ場合も同様に出力する。</td>
-</tr>
-<tr class="odd">
-<td>links[].@id</td>
-<td>string</td>
-<td>リソースのURL。</td>
-</tr>
-<tr class="even">
-<td>links[].byReference</td>
-<td>string</td>
-<td>byReference deposit の際の参照元URL。</td>
-</tr>
-<tr class="odd">
-<td>links[].contentType</td>
-<td>string</td>
-<td>リソースのコンテンツタイプ。</td>
-</tr>
-<tr class="even">
-<td>links[].dcterms:isReplacedBy</td>
-<td>string</td>
-<td>同じオブジェクト内のファイルの新しいバージョンへのURL。</td>
-</tr>
-<tr class="odd">
-<td>links[].dcterms:relation</td>
-<td>string</td>
-<td>非SWORDアクセスポイントへのURL。</td>
-</tr>
-<tr class="even">
-<td>links[].dcterms:replaces</td>
-<td>string</td>
-<td>同じオブジェクト内の古いバージョンのファイルへのURL。</td>
-</tr>
-<tr class="odd">
-<td>links[].depositedBy</td>
-<td>string</td>
-<td>アイテム登録を行ったユーザーの識別子。</td>
-</tr>
-<tr class="even">
-<td>links[].depositedOn</td>
-<td>string</td>
-<td>アイテム登録日時のタイムスタンプ。</td>
-</tr>
-<tr class="odd">
-<td>links[].depositedOnBehalfOf</td>
-<td>string</td>
-<td>代理投稿により登録を行ったユーザーの識別子。</td>
-</tr>
-<tr class="even">
-<td>links[].derivedFrom</td>
-<td>string</td>
-<td>現在のリソースが派生したリソースのURLへの参照。</td>
-</tr>
-<tr class="odd">
-<td>links[].eTag</td>
-<td>string</td>
-<td>リソースのeTag。</td>
-</tr>
-<tr class="even">
-<td>links[].log</td>
-<td>string</td>
-<td>クライアントが知っておくべきデポジットに関連する情報。</td>
-</tr>
-<tr class="odd">
-<td>links[].packaging</td>
-<td>string</td>
-<td>リソースがパッケージである場合、パッケージ形式の識別子を示す。</td>
-</tr>
-<tr class="even">
-<td>links[].rel</td>
-<td>string</td>
-<td><p>リソースとオブジェクトの関係。<br />
-以下の何れかの文字列を持つ。</p>
-<ul>
-<li>
-<p>alternate</p>
-</li>
-<li>
-<p>packaging</p>
-</li>
-<li>
-<p>depositedOn</p>
-</li>
-<li><p>depositedOnBehalfOf</p></li>
-<li><p>status</p></li>
-<li><p>log</p></li>
-<li><p>dcterms:relation</p></li>
-<li><p>dcterms:replaces</p></li>
-<li><p>dcterms:isReplacedBy</p></li>
-<li><p>versionReplaced</p></li>
-<li><p>eTag</p></li>
-<li><p>byReference</p></li>
-<li><p>derivedFrom</p></li>
-<li><p>metadataFormat</p></li>
-</ul></td>
-</tr>
-<tr class="odd">
-<td>links[].status</td>
-<td>string</td>
-<td>取り込みに関するリソースのステータス。</td>
-</tr>
-<tr class="even">
-<td>links[].versionReplacedOn</td>
-<td>string</td>
-<td>現在のリソースが新しいリソースに置き換えられた日付。</td>
-</tr>
-<tr class="odd">
-<td>metadata</td>
-<td>object</td>
-<td>メタデータを示すオブジェクト。<br />
-現時点では空オブジェクトを返す。</td>
-</tr>
-<tr class="even">
-<td>metadata.@id</td>
-<td>string</td>
-<td>メタデータのURL。</td>
-</tr>
-<tr class="odd">
-<td>metadata.eTag</td>
-<td>string</td>
-<td>メタデータのeTag。</td>
-</tr>
-<tr class="even">
-<td>service</td>
-<td>string</td>
-<td>サービスドキュメントのURL。</td>
-</tr>
-<tr class="odd">
-<td>state</td>
-<td>array</td>
-<td>アイテムがサーバー上にある状態のリスト。</td>
-</tr>
-<tr class="even">
-<td>state[].@id</td>
-<td>string</td>
-<td>状態の識別子。<br />
-現状では"http://purl.org/net/sword/3.0/state/ingested"を固定で出力。</td>
-</tr>
-<tr class="odd">
-<td>state[].description</td>
-<td>string</td>
-<td>状態の説明</td>
-</tr>
-</tbody>
-</table>
+| 項目                         | 型      | 説明                                                                                                                                   |
+| ---------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| @context                     | string  | "https://swordapp.github.io/swordv3/swordv3.jsonld" を固定で出力。                                                                     |
+| @id                          | string  | "[WEKO3のURL]/sword/deposit/[アイテムのrecid]"を出力。                                                                                 |
+| @type                        | string  | "ServiceDocument"を固定で出力。                                                                                                        |
+| actions                      | object  | アイテムに対してSWORDで使用可能なアクション。  現時点では deleteObject のみTrueを返し、それ以外はFalseを返すようになっている。         |
+| actions. appendFiles         | boolean | ファイル追加要求が発行可能か否か。                                                                                                     |
+| actions.appendMetadata       | boolean | メタデータ追加要求が発行可能か否か。                                                                                                   |
+| actions. deleteFiles         | boolean | ファイル削除要求が発行可能か否か。                                                                                                     |
+| actions. deleteMetadata      | boolean | メタデータ削除要求が発行可能か否か。                                                                                                   |
+| actions. deleteObject        | boolean | アイテム削除要求が発行可能か否か。                                                                                                     |
+| actions. getFiles            | boolean | ファイル取得要求が発行可能か否か。                                                                                                     |
+| actions. getMetadata         | boolean | メタデータ取得要求が発行可能か否か。                                                                                                   |
+| actions. replaceFiles        | boolean | ファイル置き換え要求が発行可能か否か。                                                                                                 |
+| actions. replaceMetadata     | boolean | メタデータ置き換え要求が発行可能か否か。                                                                                               |
+| eTag                         | string  | アイテムのeTag。  WEKOではアイテムのリビジョン番号を返す。                                                                             |
+| fileSet                      | object  | ファイルセットを示すオブジェクト。  現時点では空オブジェクトを返す。                                                                   |
+| fileSet.@id                  | string  | ファイルセットのURL。                                                                                                                  |
+| fileSet.eTag                 | string  | ファイルセットのeTag。                                                                                                                 |
+| links                        | array   | アイテムのリンクを示すオブジェクト。  現時点ではアイテム詳細ページのURLを出力する。またDOIやCNRIハンドルを持つ場合も同様に出力する。   |
+| links[].@id                  | string  | リソースのURL。                                                                                                                        |
+| links[].byReference          | string  | byReference deposit の際の参照元URL。                                                                                                  |
+| links[].contentType          | string  | リソースのコンテンツタイプ。                                                                                                           |
+| links[].dcterms:isReplacedBy | string  | 同じオブジェクト内のファイルの新しいバージョンへのURL。                                                                                |
+| links[].dcterms:relation     | string  | 非SWORDアクセスポイントへのURL。                                                                                                       |
+| links[].dcterms:replaces     | string  | 同じオブジェクト内の古いバージョンのファイルへのURL。                                                                                  |
+| links[].depositedBy          | string  | アイテム登録を行ったユーザーの識別子。                                                                                                 |
+| links[].depositedOn          | string  | アイテム登録日時のタイムスタンプ。                                                                                                     |
+| links[].depositedOnBehalfOf  | string  | 代理投稿により登録を行ったユーザーの識別子。                                                                                           |
+| links[].derivedFrom          | string  | 現在のリソースが派生したリソースのURLへの参照。                                                                                        |
+| links[].eTag                 | string  | リソースのeTag。                                                                                                                       |
+| links[].log                  | string  | クライアントが知っておくべきデポジットに関連する情報。                                                                                 |
+| links[].packaging            | string  | リソースがパッケージである場合、パッケージ形式の識別子を示す。                                                                         |
+| links[].rel                  | string  | リソースとオブジェクトの関係。  以下の何れかの文字列を持つ。<ul><li>alternate</li><li>packaging</li><li>depositedOn</li><li>depositedOnBehalfOf</li><li>status</li><li>log</li><li>dcterms:relation</li><li>dcterms:replaces</li><li>dcterms:isReplacedBy</li><li>versionReplaced</li><li>eTag</li><li>byReference</li><li>derivedFrom</li><li>metadataFormat</li></ul> |
+| links[].status               | string  | 取り込みに関するリソースのステータス。                                                                                                 |
+| links[].versionReplacedOn    | string  | 現在のリソースが新しいリソースに置き換えられた日付。                                                                                   |
+| metadata                     | object  | メタデータを示すオブジェクト。  現時点では空オブジェクトを返す。                                                                       |
+| metadata.@id                 | string  | メタデータのURL。                                                                                                                      |
+| metadata.eTag                | string  | メタデータのeTag。                                                                                                                     |
+| service                      | string  | サービスドキュメントのURL。                                                                                                            |
+| state                        | array   | アイテムがサーバー上にある状態のリスト。                                                                                               |
+| state[].@id                  | string  | 状態の識別子。現状では"http://purl.org/net/sword/3.0/state/ingested"を固定で出力。                                                   |
+| state[].description          | string  | 状態の説明                                                                                                                             |
 
 ### エラードキュメント
 エラー内容を表すドキュメント
 
-<table>
-<thead>
-<tr class="header">
-<th>項目</th>
-<th>型</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>@context</td>
-<td>string</td>
-<td>“https://swordapp.github.io/swordv3/swordv3.jsonld”を固定で出力。</td>
-</tr>
-<tr class="even">
-<td>@type</td>
-<td>string</td>
-<td>エラータイプを示す文字列。<br />
-4.3.3エラータイプ を参照。</td>
-</tr>
-<tr class="odd">
-<td>error</td>
-<td>string</td>
-<td>エラー内容の説明。</td>
-</tr>
-<tr class="even">
-<td>log</td>
-<td>string</td>
-<td>より詳細なエラー内容。<br />
-現在は出力していない。</td>
-</tr>
-<tr class="odd">
-<td>timestamp</td>
-<td>string</td>
-<td>エラー発生時のタイムスタンプ。</td>
-</tr>
-</tbody>
-</table>
+| 項目      | 型     | 説明                                                                |
+| --------- | ------ | ------------------------------------------------------------------- |
+| @context  | string | "https://swordapp.github.io/swordv3/swordv3.jsonld"を固定で出力。   |
+| @type     | string | エラータイプを示す文字列。[エラータイプ](#エラータイプ) を参照。    |
+| error     | string | エラー内容の説明。                                                  |
+| log       | string | より詳細なエラー内容。現在は出力していない。                      |
+| timestamp | string | エラー発生時のタイムスタンプ。                                      |
 
 ## エラータイプ
 
@@ -839,6 +597,8 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     /home/invenio/.virtualenvs/invenio/var/instance/data/tmp/weko_import_YYYYMMDDhhmmss
 
 
+## エラーメッセージ
+
 ## サーバー設定値
 
 1. アプリケーションのデフォルト値
@@ -878,7 +638,7 @@ WEKOではアイテムのリビジョン番号を返す。</td>
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_ARCHIVE_FORMAT = ["application/zip"]
     ```
 
-7. ファイルの登録を受け付けるかどうか<span id="conf07)>
+7. ファイルの登録を受け付けるかどうか<span id="conf07">
 
     ```python
     WEKO_SWORDSERVER_SERVICEDOCUMENT_ACCEPT_DEPOSITS = True
@@ -1041,28 +801,8 @@ WEKOではアイテムのリビジョン番号を返す。</td>
 
 ## 更新履歴
 
-<table>
-<thead>
-<tr class="header">
-<th>日付</th>
-<th>GitHubコミットID</th>
-<th>更新内容</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>
-<p>2022/06/13</p>
-</td>
-<td>e6db31c99d459605f5bc09f15c4abd07ea573428</td>
-<td>初版作成</td>
-</tr>
-<tr class="even">
-<td>
-<p>2023/08/31</p>
-</td>
-<td>353ba1deb094af5056a58bb40f07596b8e95a562</td>
-<td>ADMIN-2-4へのリンクを追加</td>
-</tr>
-</tbody>
-</table>
+| 日付       | GitHubコミットID                           | 更新内容                              |
+| ---------- | ------------------------------------------ | ------------------------------------- |
+| 2022/06/13 | e6db31c99d459605f5bc09f15c4abd07ea573428   | 初版作成                              |
+| 2023/08/31 | 353ba1deb094af5056a58bb40f07596b8e95a562   | ADMIN-2-4へのリンクを追加             |
+| 2024/11/26 |                                            | JSON-LD形式のメタデータ登録機能を追加 |
