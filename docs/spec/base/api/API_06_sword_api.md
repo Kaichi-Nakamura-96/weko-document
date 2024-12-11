@@ -17,7 +17,7 @@
 ## 目的・用途
 
 クライアントからSWORDv3プロトコルに従いリポジトリ上のアイテム操作を実現する。  
-アイテムを登録には、TSV/CSV、XML、あるいはJSON-LD形式のメタデータを含むZIPファイルを用いる。
+アイテム登録には、TSV/CSV、XML、あるいはJSON-LD形式のメタデータを含むZIPファイルを用いる。
 
 ## 利用方法
 
@@ -25,7 +25,11 @@ APIの認証にはOAuth2を利用する。
 アクセストークンの発行は[API-1:OAuth2](./API_01_Oauth2.md#oauth2)を参照。
 
 ### Scope：
-deposit: write
+TSV/CSVおよびJSON-LD形式のメタデータを含むZIPファイルを直接登録するためには以下のスコープが必要となる。
+- deposit: write
+XMLおよびJSON-LD形式のメタデータを含むZIPファイルをワークフロー登録するためには以下のスコープが必要となる。
+- deposit: write
+- user:activity
 
 ### エンドポイント：
 
@@ -484,6 +488,38 @@ DELETE /sword/deposit/\<recid\>
 
   - weko_workflow：ワークフロー経由でインポート処理を実行する
 
+## 関連テーブル
+
+  - sword_clients：SWORD連携設定情報を保持する
+
+    - id：ID
+    - client_id：クライアントID
+    - registration_type_id：登録方式区分
+    - mapping_id：マッピング定義ID
+    - workflow_id：ワークフローID
+
+  - sword_item_type_mappings：マッピング定義設定を保持する
+
+    - id：マッピング定義ID
+    - name：マッピング定義名
+    - mapping：マッピング定義(JSON)
+    - item_type_id：アイテムタイプID
+    - version_id：バージョンID
+    - is_delete：論理削除フラグ
+
+  - oauth2server_token：クライアントが使用できるトークンを保持する
+
+    - id：オブジェクトID
+    - client_id：クライアントID
+    - user_id：ユーザーID
+    - token_type：トークンタイプ
+    - access_token：アクセストークン
+    - refresh_token：リフレッシュトークン
+    - expires：有効期限
+    - _scopes：スコープ
+    - is_personal：個人用トークンフラグ
+    - is_internal：内部用トークンフラグ
+
 
 ## 処理概要
 使用する設定値は[サーバー設定値](#サーバー設定値)、エラーメッセージは[エラーメッセージ](#エラーメッセージ)を参照。
@@ -509,17 +545,17 @@ DELETE /sword/deposit/\<recid\>
       アクセストークンのScopeを確認し、`deposit:write`が与えられていなければエラーとする。
     - **`On-Behalf-Of`** ヘッダーが存在する場合、`On-Behalf-Of`許容設定([設定値:15](#conf15))が無効であればエラーとする。
     - **`Content-Length`** ヘッダーおよびファイルサイズを検証する。  
-      ファイルサイズ検証設定（[設定値:29](#conf29)）が有効であれば、`Content-Length`ヘッダーが不正な場合エラーとする。  
-      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（[設定値:19](#conf19)）を上回っていればえエラーとする。
-    - **`Content-Type`** ヘッダーを検証する。  
-      現在の実装では、ヘッダーがなくてもエラーとならない。
+      ファイルサイズ検証設定（[設定値:29](#conf29)）が有効であれば、`Content-Length`ヘッダーと実際のファイルサイズを比較し、不一致であればエラーとする。  
+      `Content-Length`ヘッダーの値あるいはファイルサイズがアップロードのサイズ上限（[設定値:19](#conf19)）を上回っていればエラーとする。
     - **`Content-Disposition`** ヘッダーを解析する。  
       値が`attachment`かつオプションにファイル名が指定されているかを確認し、満たさない場合はエラーとする。
+      リクエストのファイルの有無や実際のファイルと上記のファイル名の合致を確認し、問題があればエラーとする。
     - **`Content-Type`** ヘッダーをもとに送付されたファイルを検証する。  
       ヘッダーの値が`application/zip`でなければ、エラーとする。  
-      ファイルの有無や上記のファイル名の合致を確認し、問題があればエラーとする。
     - **`Packaging`** ヘッダーを検証する。  
-      メタデータのファイル形式が、TSV/CSV、XML、JSON-LD（RO-Crate+BagIt あるいは SWORDBagIt）のいずれかであることを判定する。
+      値の末尾が`SWORDBagIt`のとき、`metadata`フォルダ内に`sword.json`ファイルが存在すればSWORDBagIt形式と判定し、なければエラーとする。  
+      値の末尾が`SimpleZip`のとき、`ro-crate-metadata.json`ファイルが存在すればRO-Crate+BagIt形式と判定し、なければTSV/CSVあるいはXML形式と判定する。  
+      値がその他の場合はエラーとする。
     - **`Digest`** ヘッダーを検証する。  
       メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:28](#conf28)）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
 
@@ -536,8 +572,6 @@ DELETE /sword/deposit/\<recid\>
     - XMLファイルが含まれていなければエラーとする。
 
     **JSON-LD形式**
-    - JSON-LDファイルが含まれていなければエラーとする。  
-        ファイル名は、RO-Crate+BagIt形式の場合は`ro-crate-metadata.json`、SWORDBagIt形式の場合は`metadata/sword.json`とする。
     - 登録対象のファイルそれぞれのハッシュ値が`manifest-sha256.txt` に記載されている値と一致しなければエラーとなる。
 
 3. 登録の前処理を行う
@@ -550,8 +584,11 @@ DELETE /sword/deposit/\<recid\>
     **JSON-LD形式**
     - アクセストークンから、マッピング定義、マッピング先アイテムタイプ、登録方式を取得する  
         マッピング定義またはマッピング先のアイテムタイプが存在しない場合はエラーとする
-    - マッピング定義に基づいてメタデータのマッピングを行う
-    - `On-Behalf-Of`ヘッダーが存在する場合、取得しアイテムのコントリビュータ情報とする。
+    - JSONファイルからメタデータを取得し、マッピング定義に基づいてメタデータのマッピングを行う  
+        マッピング処理の詳細については、[メタデータマッピング機能](#メタデータマッピング機能)を参照
+    - マッピング結果に基づいて、メタデータのバリデートや必須項目のチェックを行い、問題があればエラーとする
+    - 登録先の状態やアイテムの公開ステータスのチェックを行い、問題があればエラーとする
+    - `On-Behalf-Of`ヘッダーが存在する場合、取得しアイテムのコントリビュータ情報とする
 
 4. 登録処理を行う
 
@@ -563,7 +600,7 @@ DELETE /sword/deposit/\<recid\>
     - zip形式によるインポート機能を使用してインポート処理を行う。
 
     **XML・JSON-LDでワークフロー登録の場合**
-    - 新しいワークフローを作成する。
+    - 新しいアクティビティを作成する。
     - マッピングしたメタデータをもとにDBのテーブル「workflow_activity」のメタデータを更新し、承認前までデータの登録を行う。
     - 承認不要のワークフローの場合はワークフローを最後まで実行し、承認が必要なワークフローの場合は承認の直前まで進める。
     - 必須のメタデータが存在しない場合はエラーとし、どのメタデータが必須かJSON-LD形式で返却する。
@@ -587,14 +624,16 @@ DELETE /sword/deposit/\<recid\>
 - 指定されたrecidを引数にsoft\_delete処理を実行する
 - 空のレスポンスを返却する
 
+### メタデータマッピング機能
+
 ### 処理に関するエトセトラ
 
 - zipファイルの展開に使用しているライブラリ：zipfile
 - ハッシュ値の計算に使用しているライブラリ：hashlib
-- Bagの整合性検証に使用しているライブラリ：[bagit](https://github.com/LibraryOfCongress/bagit-python/tree/v1.7.0)
+- Bagの整合性検証に使用しているライブラリ：[bagit v1.7.0](https://github.com/LibraryOfCongress/bagit-python/tree/v1.7.0)
 - アイテムをインポートする際に作成するテンポラリファイルは以下のように生成する
 
-    /home/invenio/.virtualenvs/invenio/var/instance/data/tmp/weko_import_YYYYMMDDhhmmss
+    /tmp/weko_import_YYYYMMDDhhmmss
 
 
 ## エラーメッセージ
@@ -780,7 +819,7 @@ DELETE /sword/deposit/\<recid\>
 27. データセット識別子の置換設定
 
     ```python
-    WEKO_SWORDSERVER_DATASET_IDENTIFIER = {
+    WEKO_SWORDSERVER_DATASET_ROOT = {
         "": "./",
         "enc": base64.b64encode(f"{WEKO_SWORDSERVER_DATASET_PREFIX}./".encode("utf-8")).decode("utf-8")
     }
