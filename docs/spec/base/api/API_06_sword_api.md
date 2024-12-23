@@ -16,7 +16,7 @@
 
 ## 目的・用途
 
-クライアントからSWORDv3プロトコルに従いリポジトリ上のアイテム操作を実現する。  
+クライアントからSWORD v3プロトコルに従いリポジトリ上のアイテム操作を実現する。  
 アイテム登録には、TSV/CSV、XML、あるいはJSON-LD形式のメタデータを含むZIPファイルを用いる。
 
 ## 利用方法
@@ -209,7 +209,8 @@ curl -X DELETE https://192.168.56.101/sword/deposit/1 -H "Authorization:Bearer D
     - TSV/CSV形式のメタデータを含むZIPファイルの詳細は [ADMIN-2-4:インポート](../admin/ADMIN_2_4.md#インポート) を参照
     - JSON-LD形式のメタデータを含むZIPファイルは、RO-Crate+BagItまたはSWORDBagItに準拠したZIPファイルである必要がある。
 
-- アイテム登録機能では、メタデータのファイルがXMLおよびJSON-LD形式である場合、メタデータをアイテムタイプへマッピングする。
+- XMLおよびJSON-LD形式のメタデータは、マッピング機能をもちいてWEKO3のアイテムタイプへ変換されメタデータの登録および更新に使用される。  
+  また、データセット登録設定([設定:30](#conf30))が有効の場合、ZIPファイルそのものもアイテムのファイルの一つとして保存する。
 
 ## API仕様
 
@@ -428,7 +429,7 @@ DELETE /sword/deposit/\<recid\>
 | metadata.eTag                | string  | メタデータのeTag。                                                                                                                     |
 | service                      | string  | サービスドキュメントのURL。                                                                                                            |
 | state                        | array   | アイテムがサーバー上にある状態のリスト。                                                                                               |
-| state[].@id                  | string  | 状態の識別子。現状では"http://purl.org/net/sword/3.0/state/ingested"を固定で出力。                                                   |
+| state[].@id                  | string  | 状態の識別子。現状では"http://purl.org/net/sword/3.0/state/ingested"を固定で出力。                                                     |
 | state[].description          | string  | 状態の説明                                                                                                                             |
 
 ### エラードキュメント
@@ -439,7 +440,7 @@ DELETE /sword/deposit/\<recid\>
 | @context  | string | "https://swordapp.github.io/swordv3/swordv3.jsonld"を固定で出力。   |
 | @type     | string | エラータイプを示す文字列。[エラータイプ](#エラータイプ) を参照。    |
 | error     | string | エラー内容の説明。                                                  |
-| log       | string | より詳細なエラー内容。現在は出力していない。                      |
+| log       | string | より詳細なエラー内容。現在は出力していない。                        |
 | timestamp | string | エラー発生時のタイムスタンプ。                                      |
 
 ## エラータイプ
@@ -458,14 +459,14 @@ DELETE /sword/deposit/\<recid\>
 | ETagRequired                 | 412    | リクエストヘッダーにIf-Matchの値が指定されていない。                                         |
 | Forbidden                    | 403    | サーバーによって許可されていない操作をリクエストした。                                       |
 | FormatHeaderMismatch         | 415    | サーバーがサポートしていない形式のコンテンツがリクエストされた。                             |
-| InvalidSegmentSize           | 400    | Segmented File Upload時のファイルサイズが範囲外。                                           |
-| MaxAssembledSizeExceeded     | 400    | Segmented File Upload時の合計ファイルサイズが最大値を超えている。                           |
+| InvalidSegmentSize           | 400    | Segmented File Upload時のファイルサイズが範囲外。                                            |
+| MaxAssembledSizeExceeded     | 400    | Segmented File Upload時の合計ファイルサイズが最大値を超えている。                            |
 | MaxUploadSizeExceeded        | 413    | アップロードされたコンテンツサイズが最大値を超えている                                       |
 | MetadataFormatNotAcceptable  | 415    | サーバーがサポートしていない形式のMetadata-Formatがリクエストされた。                        |
 | MethodNotAllowed             | 405    | メソッドへのアクセスが許可されていない。                                                     |
 | OnBehalfOfNotAllowed         | 412    | サーバーが On-Behalf-Of をサポートしていない。                                               |
 | PackagingFormatNotAcceptable | 415    | サーバーがサポートしていない形式のPackagingフォーマットがリクエストされた。                  |
-| SegmentedUploadTimedOut      | 410    | Segmented File Upload先のURLにアクセスできない。                                            |
+| SegmentedUploadTimedOut      | 410    | Segmented File Upload先のURLにアクセスできない。                                             |
 | SegmentLimitExceeded         | 400    | セグメント数が最大値を超えている。                                                           |
 | UnexpectedSegment            | 400    | サーバーが予期していないセグメントを受信した。                                               |
 | **Additional ErrorType**     |        |                                                                                              |
@@ -476,15 +477,15 @@ DELETE /sword/deposit/\<recid\>
 ## 関連モジュール
 
 
-  - invenio\_oauth2server：OAuthトークンによるユーザー認証を行う
+  - invenio_oauth2server：OAuthトークンによるユーザー認証を行う
 
-  - invenio\_deposit：OAuthトークンが参照するデポジット操作スコープを定義している
+  - invenio_deposit：OAuthトークンが参照するデポジット操作スコープを定義している
 
   - weko_swordserver：リクエストの処理を行う
 
-  - weko\_records\_ui：レコード情報の取得、アイテムの削除を実行する
+  - weko_records_ui：レコード情報の取得、アイテムの削除を実行する
 
-  - weko\_search\_ui：インポート処理を実行する
+  - weko_search_ui：インポート処理を実行する
 
   - weko_workflow：ワークフロー経由でインポート処理を実行する
 
@@ -557,7 +558,7 @@ DELETE /sword/deposit/\<recid\>
       値の末尾が`SimpleZip`のとき、`ro-crate-metadata.json`ファイルが存在すればRO-Crate+BagIt形式と判定し、なければTSV/CSVあるいはXML形式と判定する。  
       値がその他の場合はエラーとする。
     - **`Digest`** ヘッダーを検証する。  
-      メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:28](#conf28)）が有効であれば、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
+      メタデータ形式がJSON-LD、かつダイジェスト検証設定（[設定値:28](#conf28)）が有効であるとき、Digestとリクエストボディのハッシュ値が一致しなければエラーとする。
 
     ※ SWORD APIでは使用可能なエラータイプが定められているため、適切なエラータイプが存在しない場合はBadRequest(エラーコード400)とし、エラードキュメントにエラー原因を記述し返却する。
 
@@ -589,6 +590,8 @@ DELETE /sword/deposit/\<recid\>
     - マッピング結果に基づいて、メタデータのバリデートや必須項目のチェックを行い、問題があればエラーとする
     - 登録先の状態やアイテムの公開ステータスのチェックを行い、問題があればエラーとする
     - `On-Behalf-Of`ヘッダーが存在する場合、取得しアイテムのコントリビュータ情報とする
+    - データセット登録設定（[設定値:30](#conf30)）が有効であれば、メタデータを含むZIPファイルそのものもアイテムの
+      一部として登録するようにメタデータを作成し追加する
 
 4. 登録処理を行う
 
@@ -597,7 +600,7 @@ DELETE /sword/deposit/\<recid\>
     一方、RO-Crate+BagIt形式およびSWORDBagIt形式のZIPファイルの場合は、連携設定から取得した登録方式に従う。
 
     **TSV/CSV・JSON-LDで直接登録の場合**
-    - zip形式によるインポート機能を使用してインポート処理を行う。
+    - ZIPによるインポート機能を使用してインポート処理を行う。
 
     **XML・JSON-LDでワークフロー登録の場合**
     - 新しいアクティビティを作成する。
@@ -621,14 +624,20 @@ DELETE /sword/deposit/\<recid\>
 - リクエストをチェックする
     - Authorizationヘッダーに記載されたOAuth認証情報を使用しWEKOにログインする
     - On-Behalf-Ofヘッダーが存在する場合、サーバー設定を確認する
-- 指定されたrecidを引数にsoft\_delete処理を実行する
+- 指定されたrecidを引数にsoft_delete処理を実行する
 - 空のレスポンスを返却する
 
 ### メタデータマッピング機能
+- JSON-LD形式のメタデータを、マッピング定義をもとにWEKO3のアイテムタイプにマッピングする機能を提供する。
+- 現時点でRO-Crate+BagIt形式のメタデータのマッピングにのみ対応している。
+- この処理にはJSON形式で記述されたマッピング定義と、アイテムタイプのスキーマ定義を使用する。  
+  マッピング定義には、JSON-LD形式のメタデータのキーと、WEKO3のアイテムタイプのプロパティ名を対応付ける情報が記述されている。  
+  そして、アイテムタイプのスキーマ定義をもとに登録に適した構造のメタデータを構築する。
+- アイテムタイプにマッピング定義にないメタデータを保持するプロパティが存在する場合、マッピング先のないメタデータはそこに格納される。
 
 ### 処理に関するエトセトラ
 
-- zipファイルの展開に使用しているライブラリ：zipfile
+- ZIPの展開に使用しているライブラリ：zipfile
 - ハッシュ値の計算に使用しているライブラリ：hashlib
 - Bagの整合性検証に使用しているライブラリ：[bagit v1.7.0](https://github.com/LibraryOfCongress/bagit-python/tree/v1.7.0)
 - アイテムをインポートする際に作成するテンポラリファイルは以下のように生成する
@@ -835,6 +844,12 @@ DELETE /sword/deposit/\<recid\>
 
     ```python
     WEKO_SWORDSERVER_CONTENT_LENGTH = False
+    ```
+
+30. データセットのzipファイルをアイテムとして登録するか<span id="conf30">
+
+    ```python
+    WEKO_SWORDSERVER_DEPOSIT_DATASET = False
     ```
 
 
