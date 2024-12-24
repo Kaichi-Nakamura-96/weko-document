@@ -646,7 +646,201 @@ DELETE /sword/deposit/\<recid\>
 
 
 ## エラーメッセージ
-TODO: エラーメッセージの内容を記載する
+### decorators.py
+- OAuthトークンがリクエストに含まれていない場合
+  ```python
+  "OAuth token is missing in the request."
+  ```
+
+- ```On-Behalf-Of``` ヘッダーがリクエストに含まれていない場合
+  ```python
+  "On-Behalf-Of header is missing in the request."
+  ```
+
+- ```On-Behalf-Of``` ヘッダーがサポートされていない場合
+  ```python
+  "Not support On-Behalf-Of but request has it."
+  ```
+
+- リクエストにファイルが含まれていない場合
+  ```python
+  "No file part."
+  ```
+
+- ファイルが選択されていない場合
+  ```python
+  "No selected file."
+  ```
+
+- ```Content-Length``` ヘッダーがリクエストに含まれていない場合
+  ```python
+  "Content-Length is required, but not contained in request headers."
+  ```
+
+- ```Content-Length``` が実際のファイルサイズと一致しない場合
+  ```python
+  f"Content-Length is not match. (request:{contentLength}, real:{real_contentLength})"
+  ```
+
+- コンテンツサイズが最大アップロードサイズを超える場合
+  ```python
+  f"Content size is too large. (request:{contentLength}, maxUploadSize:{maxUploadSize})"
+  ```
+
+- サポートされていない ```Content-Type``` がリクエストに含まれている場合
+  ```python
+  f"Not accept Content-Type: {failedContentType}"
+  ```
+
+- サポートされていないパッケージング形式がリクエストに含まれている場合
+  ```python
+  f"Not accept packaging: {packaging}"
+  ```
+
+### views.py
+- ```Content-Disposition``` ヘッダーからファイル名を取得できない場合
+  ```python
+  "Cannot get filename by Content-Disposition."
+  ```
+
+- リクエストボディにファイルが見つからない場合
+  ```python
+  f"Not found {filename} in request body."
+  ```
+
+- リクエストボディとダイジェストの検証に失敗した場合
+  ```python
+  "Request body and digest verification failed."
+  ```
+
+- インポートアイテムのチェック中にエラーが発生した場合
+  ```python
+  f"Error in check_import_items: {check_result_msg}"
+  ```
+
+- アイテムが既に登録されている場合
+  ```python
+  f"This item is already registered: {item.get('item_title')}"
+  ```
+
+- アイテムのシステムへのインポート中にエラーが発生した場合
+  ```python
+  f"Error in import_items_to_system: {item.get('error_id')}"
+  ```
+
+### utils.py
+- SWORDBagIt形式で ```metadata/sword.json``` が存在しない場合
+  ```python
+  "SWORDBagIt requires metadate/sword.json."
+  ```
+
+- サポートされていないパッケージング形式がリクエストに含まれている場合
+  ```python
+  f"Not accept packaging format: {packaging}"
+  ```
+
+- json-ld形式が無効な場合
+  ```python
+  "Invalid json-ld format."
+  ```
+
+### registration.py
+- ```On-Behalf-Of``` ヘッダーでユーザー検索中にエラーが発生した場合
+  ```python
+  "Somthing went wrong while searching user by On-Behalf-Of."
+  ```
+
+- SWORDクライアントに対するマッピングが定義されていない場合
+  ```python
+  "Mapping not defined for sword client."
+  ```
+
+- ワークフローが見つからない、または削除されている場合
+  ```python
+  "Workflow not found for sword client."
+  ```
+
+- アイテムタイプとワークフローが一致しない場合
+  ```python
+  f"Item type and workflow do not match. ItemType ID must be {sword_mapping.item_type_id}, but the workflow's ItemType ID was {workflow.itemtype_id}."
+  ```
+
+- アイテムタイプが見つからない場合
+  ```python
+  "Item type not found for sword client."
+  ```
+
+- ファイルの抽出中にエラーが発生した場合
+  ```python
+  "An error occurred while extraction the file."
+  ```
+
+- Bagの検証に失敗した場合
+  ```python
+  "Bag validation failed."
+  ```
+
+- ファイルの読み込み中にエラーが発生した場合
+  ```python
+  "An error occurred while reading the file."
+  ```
+
+- ファイルのチェック中にエラーが発生した場合
+  ```python
+  "An error occurred while checking the file."
+  ```
+
+### api.py
+- マッピングが見つからない場合
+  ```python
+  f"Mapping not found. ID: {id}"
+  ```
+
+- ワークフロー登録に必要なワークフローIDが指定されていない場合
+  ```python
+  "Workflow ID is required for workflow registration."
+  ```
+
+- クライアントが見つからない場合
+  ```python
+  f"Client not found. ID: {client_id}"
+  ```
+
+- クライアントの更新時にワークフローIDが指定されていない場合
+  ```python
+  "Workflow ID is required for workflow registration."
+  ```
+
+### mapper.py
+- ```dict``` 内にキーが存在しない場合
+  ```python
+  f"Invalid mapping definition: Value: {value} got from {json_key} but still need to get {json_keys[1:]}."
+  ```
+
+- ```list``` 内に ```list``` が含まれている場合
+  ```python
+  "Invalid metadata file: List in list not supported."
+  ```
+
+- ```dict``` 内にキーが存在しない場合
+  ```python
+  f"Invalid mapping definition: Value: {value} got from list but still need to get {json_keys}."
+  ```
+
+- ```dict``` 内の値が ```dict``` であり、さらにキーが必要な場合
+  ```python
+  "Invalid mapping definition: Value is dict but still need to get more keys."
+  ```
+
+- ```type_of_item_type_path``` の長さが ```item_map_keys``` の長さと一致しない場合
+  ```python
+  f"Failed in mapping process: type_of_item_type_path length: {len(type_of_item_type_path)} is not equal to item_map_keys length: {len(item_map_keys)}."
+  ```
+
+- ```type_of_item_type_path``` が ```value``` で終わらない、または ```value``` が1回以上含まれている場合
+  ```python
+  "Failed in mapping process: type_of_item_type_path must contain exactly one 'value' element at the end."
+  ```
 
 ## サーバー設定値
 
