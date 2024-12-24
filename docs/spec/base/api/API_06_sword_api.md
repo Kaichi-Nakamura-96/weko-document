@@ -646,6 +646,7 @@ DELETE /sword/deposit/\<recid\>
 
 
 ## エラーメッセージ
+TODO: エラーメッセージの内容を記載する
 
 ## サーバー設定値
 
