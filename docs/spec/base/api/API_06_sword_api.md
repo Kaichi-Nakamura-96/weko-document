@@ -646,198 +646,192 @@ DELETE /sword/deposit/\<recid\>
 
 
 ## エラーメッセージ
-### decorators.py
-- OAuthトークンがリクエストに含まれていない場合
+1. OAuthトークンがリクエストに含まれていない場合
   ```python
   "OAuth token is missing in the request."
   ```
 
-- ```On-Behalf-Of``` ヘッダーがリクエストに含まれていない場合
+2. ```On-Behalf-Of``` ヘッダーがリクエストに含まれていない場合
   ```python
   "On-Behalf-Of header is missing in the request."
   ```
 
-- ```On-Behalf-Of``` ヘッダーがサポートされていない場合
+3. ```On-Behalf-Of``` ヘッダーがサポートされていない場合
   ```python
   "Not support On-Behalf-Of but request has it."
   ```
 
-- リクエストにファイルが含まれていない場合
+4. リクエストにファイルが含まれていない場合
   ```python
   "No file part."
   ```
 
-- ファイルが選択されていない場合
+5. ファイルが選択されていない場合
   ```python
   "No selected file."
   ```
 
-- ```Content-Length``` ヘッダーがリクエストに含まれていない場合
+6. ```Content-Length``` ヘッダーがリクエストに含まれていない場合
   ```python
   "Content-Length is required, but not contained in request headers."
   ```
 
-- ```Content-Length``` が実際のファイルサイズと一致しない場合
+7. ```Content-Length``` が実際のファイルサイズと一致しない場合
   ```python
-  f"Content-Length is not match. (request:{contentLength}, real:{real_contentLength})"
+  "Content-Length is not match. (request:[Content-Lengthの値], real:[実際のファイルサイズ])"
   ```
 
-- コンテンツサイズが最大アップロードサイズを超える場合
+8. ```Content-Length``` が最大アップロードサイズを超える場合
   ```python
-  f"Content size is too large. (request:{contentLength}, maxUploadSize:{maxUploadSize})"
+  "Content size is too large. (request:[Content-Lengthの値], maxUploadSize:[最大アップロードサイズ])"
   ```
 
-- サポートされていない ```Content-Type``` がリクエストに含まれている場合
+9. サポートされていない ```Content-Type``` がリクエストに含まれている場合
   ```python
-  f"Not accept Content-Type: {failedContentType}"
+  "Not accept Content-Type: [サポートされていないContent-Type]"
   ```
 
-- サポートされていないパッケージング形式がリクエストに含まれている場合
+10. サポートされていないパッケージング形式がリクエストに含まれている場合
   ```python
-  f"Not accept packaging: {packaging}"
+  "Not accept packaging: [サポートされていないパッケージング形式]"
   ```
 
-### views.py
-- ```Content-Disposition``` ヘッダーからファイル名を取得できない場合
+11. ```Content-Disposition``` ヘッダーからファイル名を取得できない場合
   ```python
   "Cannot get filename by Content-Disposition."
   ```
 
-- リクエストボディにファイルが見つからない場合
+12. リクエストボディにファイルが見つからない場合
   ```python
-  f"Not found {filename} in request body."
+  "Not found [ファイル名] in request body."
   ```
 
-- リクエストボディとダイジェストの検証に失敗した場合
+13. リクエストボディとダイジェストの検証に失敗した場合
   ```python
   "Request body and digest verification failed."
   ```
 
-- インポートアイテムのチェック中にエラーが発生した場合
+14. インポートアイテムのチェック中にエラーが発生した場合
   ```python
-  f"Error in check_import_items: {check_result_msg}"
+  "Error in check_import_items: [エラーメッセージ]"
   ```
 
-- アイテムが既に登録されている場合
+15. アイテムが既に登録されている場合
   ```python
-  f"This item is already registered: {item.get('item_title')}"
+  "This item is already registered: [アイテムのタイトル]"
   ```
 
-- アイテムのシステムへのインポート中にエラーが発生した場合
+16. アイテムのシステムへのインポート中にエラーが発生した場合
   ```python
-  f"Error in import_items_to_system: {item.get('error_id')}"
+  "Error in import_items_to_system: [エラーID]"
   ```
 
-### utils.py
-- SWORDBagIt形式で ```metadata/sword.json``` が存在しない場合
+17. SWORDBagIt形式で ```metadata/sword.json``` が存在しない場合
   ```python
   "SWORDBagIt requires metadate/sword.json."
   ```
 
-- サポートされていないパッケージング形式がリクエストに含まれている場合
+18. サポートされていないパッケージング形式がリクエストに含まれている場合
   ```python
-  f"Not accept packaging format: {packaging}"
+  "Not accept packaging format: [パッケージング形式]"
   ```
 
-- json-ld形式が無効な場合
+19. json-ld形式が無効な場合
   ```python
   "Invalid json-ld format."
   ```
 
-### registration.py
-- ```On-Behalf-Of``` ヘッダーでユーザー検索中にエラーが発生した場合
+20. ```On-Behalf-Of``` ヘッダーでユーザー検索中にエラーが発生した場合
   ```python
   "Somthing went wrong while searching user by On-Behalf-Of."
   ```
 
-- SWORDクライアントに対するマッピングが定義されていない場合
+21. SWORDクライアントに対するマッピングが定義されていない場合
   ```python
   "Mapping not defined for sword client."
   ```
 
-- ワークフローが見つからない、または削除されている場合
+22. ワークフローが見つからない、または削除されている場合
   ```python
   "Workflow not found for sword client."
   ```
 
-- アイテムタイプとワークフローが一致しない場合
+23. マッピング定義設定のアイテムタイプIDとワークフローのアイテムタイプIDが一致しない場合
   ```python
-  f"Item type and workflow do not match. ItemType ID must be {sword_mapping.item_type_id}, but the workflow's ItemType ID was {workflow.itemtype_id}."
+  "Item type and workflow do not match. ItemType ID must be [マッピング定義設定のアイテムタイプID], but the workflow's ItemType ID was [ワークフローのアイテムタイプID]."
   ```
 
-- アイテムタイプが見つからない場合
+24. アイテムタイプが見つからない場合
   ```python
   "Item type not found for sword client."
   ```
 
-- ファイルの抽出中にエラーが発生した場合
+25. ファイルの抽出中にエラーが発生した場合
   ```python
   "An error occurred while extraction the file."
   ```
 
-- Bagの検証に失敗した場合
+26. Bagの検証に失敗した場合
   ```python
   "Bag validation failed."
   ```
 
-- ファイルの読み込み中にエラーが発生した場合
+27. ファイルの読み込み中にエラーが発生した場合
   ```python
   "An error occurred while reading the file."
   ```
 
-- ファイルのチェック中にエラーが発生した場合
+28. ファイルのチェック中にエラーが発生した場合
   ```python
   "An error occurred while checking the file."
   ```
 
-### api.py
-- マッピングが見つからない場合
+29. マッピング定義が見つからない場合
   ```python
-  f"Mapping not found. ID: {id}"
+  "Mapping not found. ID: [ID]"
   ```
 
-- ワークフロー登録に必要なワークフローIDが指定されていない場合
-  ```python
-  "Workflow ID is required for workflow registration."
-  ```
-
-- クライアントが見つからない場合
-  ```python
-  f"Client not found. ID: {client_id}"
-  ```
-
-- クライアントの更新時にワークフローIDが指定されていない場合
+30. ワークフロー登録に必要なワークフローIDが指定されていない場合
   ```python
   "Workflow ID is required for workflow registration."
   ```
 
-### mapper.py
-- ```dict``` 内にキーが存在しない場合
+31. クライアントが見つからない場合
   ```python
-  f"Invalid mapping definition: Value: {value} got from {json_key} but still need to get {json_keys[1:]}."
+  "Client not found. ID: [クライアントID]"
   ```
 
-- ```list``` 内に ```list``` が含まれている場合
+32. クライアントの更新時にワークフローIDが指定されていない場合
+  ```python
+  "Workflow ID is required for workflow registration."
+  ```
+
+33. ```dict``` 内にキーが存在しない場合
+  ```python
+  "Invalid mapping definition: Value: [プロパティの値] got from [プロパティのキー] but still need to get [以降のプロパティのキー]."
+  ```
+
+34. ```list``` 内に ```list``` が含まれている場合
   ```python
   "Invalid metadata file: List in list not supported."
   ```
 
-- ```dict``` 内にキーが存在しない場合
+35. ```dict``` 内にキーが存在しない場合
   ```python
-  f"Invalid mapping definition: Value: {value} got from list but still need to get {json_keys}."
+  "Invalid mapping definition: Value: [プロパティの値] got from list but still need to get [以降のプロパティのキー]."
   ```
 
-- ```dict``` 内の値が ```dict``` であり、さらにキーが必要な場合
+36. ```dict``` 内の値が ```dict``` であり、さらにキーが必要な場合
   ```python
   "Invalid mapping definition: Value is dict but still need to get more keys."
   ```
 
-- ```type_of_item_type_path``` の長さが ```item_map_keys``` の長さと一致しない場合
+37. ```type_of_item_type_path``` の長さが ```item_map_keys``` の長さと一致しない場合
   ```python
-  f"Failed in mapping process: type_of_item_type_path length: {len(type_of_item_type_path)} is not equal to item_map_keys length: {len(item_map_keys)}."
+  f"Failed in mapping process: type_of_item_type_path length: [type_of_item_type_pathの長さ] is not equal to item_map_keys length: [item_map_keysの長さ]."
   ```
 
-- ```type_of_item_type_path``` が ```value``` で終わらない、または ```value``` が1回以上含まれている場合
+38. ```type_of_item_type_path``` が ```value``` で終わらない、または ```value``` が1回以上含まれている場合
   ```python
   "Failed in mapping process: type_of_item_type_path must contain exactly one 'value' element at the end."
   ```
