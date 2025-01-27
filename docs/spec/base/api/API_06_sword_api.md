@@ -26,9 +26,9 @@ APIの認証にはOAuth2を利用する。
 
 ### Scope：
 TSV/CSVおよびJSON-LD形式のメタデータを含むZIPファイルを直接登録するためには以下のスコープが必要となる。
-- deposit: write
+- deposit:write
 XMLおよびJSON-LD形式のメタデータを含むZIPファイルをワークフロー登録するためには以下のスコープが必要となる。
-- deposit: write
+- deposit:write
 - user:activity
 
 ### エンドポイント：
