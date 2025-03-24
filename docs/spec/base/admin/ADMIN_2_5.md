@@ -379,10 +379,49 @@ RO-Crate+BagItファイルに含まれる`ro-crate-metadata.json`ファイルを
 
 
 ## メタデータ補完機能
+DOIから各種APIを用いて得られるメタデータを用いて、インポート時にメタデータ補完を行う。  
+以下に概要を記した。
+
+### 設定
+`weko_items_autofill/config.py`にて設定される設定値`WEKO_ITEMS_AUTOFILL_TO_BE_USED`を用いる。  
+設定値は、使用するAPIまたはファイルに含まれるメタデータ自体(`Original`)の組合せを、優先度順に格納したリストである。  
+以下に例を記す。
+
+```python
+WEKO_ITEMS_AUTOFILL_TO_BE_USED = [
+  # 優先度順に格納
+  "医中誌 Web API",
+  "JaLC API",
+  "CrossRef",
+  "DataCite",
+  "Original"
+]
+```
+
+### 処理の実行条件
+ro-crate-metadata.jsonに含まれる`wk:metadataAutoFill`が`True`の場合、DOIが含まれれば本処理を実行する。  
+本処理に用いるDOIは、`"jpcoar:relatopn"`の`"relationType"`が`"isVersionOf"`になる最初の要素の、`"cite-as"`の値である。  
+以下に例を記す。
+
+```json
+{
+  "@id": "./",
+  "jpcoar:relation": [{ "@id": "_:Relation1" }, { "@id"; "_:Relation2" }],
+  "wk:metadataAutoFill": true
+},
+{
+  "@id": "_:Relation1" 
+  "relationType": "isVersionOf" 
+  "cite-as": "https://doi.org/10.34477/0002000074" 
+}
+```
+
+処理の詳細に関しては、[機能設計書:メタデータ補完機能(IF)]を参照のこと。
 
 ## 関連モジュール
 
 - weko_search_ui：インポート処理およびマッピング処理を実行する
+- weko_items_autofill：メタデータ補完を実行する
 
 ## 関連テーブル
 
