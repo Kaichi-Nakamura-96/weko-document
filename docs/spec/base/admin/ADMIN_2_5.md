@@ -1,7 +1,8 @@
 # RO-Crate インポート
 
 ## 目的・用途
-本機能は、管理者として、RO-Crate+BagItファイルをインポートし、データを登録する機能である。
+本機能は、管理者として、RO-Crate+BagItファイルをインポートし、データを登録する機能である。  
+対象ファイルに含まれるro-crate-metadata.json内で既存のアイテムIDが指定されている場合に限り、そのアイテムの更新を行う。
 
 ## 利用方法
 管理者は 【Administration > アイテム管理（Items） > RO-Crate インポート（RO-Crate Import）】を開き、アイテム登録用のRO-Crate+BagItファイルを登録する。
