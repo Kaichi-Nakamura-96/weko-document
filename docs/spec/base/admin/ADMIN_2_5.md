@@ -414,7 +414,7 @@ ro-crate-metadata.jsonに含まれる`wk:metadataAutoFill`が`true`の場合、D
 ```json
 {
   "@id": "./",
-  "jpcoar:relation": [{ "@id": "_:Relation1" }, { "@id"; "_:Relation2" }],
+  "jpcoar:relation": [{ "@id": "_:Relation1" }, { "@id": "_:Relation2" }],
   "wk:metadataAutoFill": true
 },
 {
