@@ -2,7 +2,7 @@
 
 ## 目的・用途
 本機能は、管理者として、RO-Crate+BagItファイルをインポートし、データを登録する機能である。  
-対象ファイルに含まれるro-crate-metadata.json内で既存のアイテムIDが指定されている場合に限り、そのアイテムの更新を行う。
+対象ファイルに含まれる`ro-crate-metadata.json`内で既存のアイテムIDが指定されている場合に限り、そのアイテムの更新を行う。
 
 ## 利用方法
 管理者は 【Administration > アイテム管理（Items） > RO-Crate インポート（RO-Crate Import）】を開き、アイテム登録用のRO-Crate+BagItファイルを登録する。
@@ -17,7 +17,8 @@
 
 ## 機能内容
 
-- RO-Crate+BagItファイルをインポートし、アイテムを登録する。
+- RO-Crate+BagItファイルをインポートし、アイテムを登録する。  
+  ※既存のアイテムIDが指定されている場合、そのアイテムを更新する。
 - RO-Crate+BagItファイルに含まれる`ro-crate-metadata.json`ファイルを読み込み、アイテムのメタデータへマッピングする。
 - WEB APIを利用してDOIによるメタデータ補完を提供する。
 
@@ -136,23 +137,24 @@ TSV形式のメタデータ項目とシステム向け語彙について、定�
 カスタム語彙はプレフィックスとして、`wk:`が付与されている。  
 インポート時に必須である項目は、インデックスIDと公開ステータスである。
 
-| 使用語彙                                   | 対応するTSV項目名    | バリュータイプ     | デフォルト値 | 親エンティティタイプ | 説明                     |
-| ------------------------------------------ | -------------------- | ------------------ | ------------ | -------------------- | ------------------------ |
-| identifier                                 | ID                   | 整数値             | -            | Dataset              | アイテムID               |
-| uri                                        | URI                  | URL                | -            | Dataset              | アイテムのURI            |
-| wk:index                                   | .IndexID             | 配列               | -            | Dataset              | インデックスID           |
-| wk:publishStatus                           | .PUBLISH_STATUS      | 文字列             | -            | Dataset              | 公開ステータス           |
-| wk:feedbackMail                            | .FEEDBACK_MAIL       | 文字列             | -            | Dataset              | フィードバックメール     |
-| wk:requestMail                             | .REQUEST_MAIL        | 文字列             | -            | Dataset              | リクエストメール         |
-| wk:grant.@id                               | .CNRI                | URL                | -            | Dataset              | CNRI                     |
-| wk:grant.@id                               | .DOI                 | URL                | -            | Dataset              | DOI                      |
-| wk:grant<br>.jpcoar:identifierRegistration | .DOI_RA              | URL                | -            | Dataset              | DOI_RA                   |
-| wk:editMode                                | Keep/Upgrade Version | 文字列             | -            | Dataset              | Keep/Upgrade Version     |
-| wk:itemLinks.identifier                    | -                    | 整数値 or 文字列   | -            | File                 | アイテムリンク先識別子   |
-| wk:itemLinks.value                         | -                    | 文字列             | -            | File                 | アイテムリンクタイプ     |
-| wk:textExtraction                          | -                    | 真偽値             | true         | File                 | 全文検索用本文抽出フラグ |
-| wk:saveAsIs                                | -                    | 真偽値             | false        | Dataset              | 登録用ファイル保存フラグ |
-| wk:isSplited                               | -                    | 真偽値             | false        | File                 | アイテム分割フラグ       |
+| 使用語彙                                   | 対応するTSV項目名    | バリュータイプ   | デフォルト値 | 親エンティティタイプ | 説明                     |
+| ------------------------------------------ | -------------------- | ---------------- | ------------ | -------------------- | ------------------------ |
+| identifier                                 | ID                   | 整数値           | -            | Dataset              | アイテムID               |
+| uri                                        | URI                  | URL              | -            | Dataset              | アイテムのURI            |
+| wk:index                                   | .IndexID             | 配列             | -            | Dataset              | インデックスID           |
+| wk:publishStatus                           | .PUBLISH_STATUS      | 文字列           | -            | Dataset              | 公開ステータス           |
+| wk:feedbackMail                            | .FEEDBACK_MAIL       | 文字列           | -            | Dataset              | フィードバックメール     |
+| wk:requestMail                             | .REQUEST_MAIL        | 文字列           | -            | Dataset              | リクエストメール         |
+| wk:grant.@id                               | .CNRI                | URL              | -            | Dataset              | CNRI                     |
+| wk:grant.@id                               | .DOI                 | URL              | -            | Dataset              | DOI                      |
+| wk:grant<br>.jpcoar:identifierRegistration | .DOI_RA              | URL              | -            | Dataset              | DOI_RA                   |
+| wk:editMode                                | Keep/Upgrade Version | 文字列           | -            | Dataset              | Keep/Upgrade Version     |
+| wk:itemLinks.identifier                    | -                    | 整数値 or 文字列 | -            | File                 | アイテムリンク先識別子   |
+| wk:itemLinks.value                         | -                    | 文字列           | -            | File                 | アイテムリンクタイプ     |
+| wk:textExtraction                          | -                    | 真偽値           | true         | File                 | 全文検索用本文抽出フラグ |
+| wk:saveAsIs                                | -                    | 真偽値           | false        | Dataset              | 登録用ファイル保存フラグ |
+| wk:isSplited                               | -                    | 真偽値           | false        | File                 | アイテム分割フラグ       |
+| wk:metadataAutoFill                        | -                    | 真偽値           | false        | Dataset              | メタデータ補完フラグ     |
 
 ※ 登録用ファイル保存フラグとアイテム分割フラグが両方`true`の場合、アイテム分割フラグが優先され、ファイルは展開されて保存される。
 
@@ -334,6 +336,11 @@ WEKO3においてRO-Crateは、SWORD APIを利用してアイテムを登録す�
 }
 ```
 
+### wk:metadataAutoFill：メタデータ補完フラグ<span id="metadataAutoFill">
+
+メタデータ補完機能を利用するかどうかを指定する。デフォルト値は`false`である。  
+詳細については、[メタデータ補完機能](#メタデータ補完機能)を参照のこと。
+
 ## マッピング機能
 RO-Crate+BagItファイルに含まれる`ro-crate-metadata.json`ファイルを読み込み、あらかじめ設定されたマッピング定義に基づいてJSON-LD形式で記述されたメタデータをアイテムタイプへマッピングする。
 
@@ -400,7 +407,7 @@ WEKO_ITEMS_AUTOFILL_TO_BE_USED = [
 ```
 
 ### 処理の実行条件
-ro-crate-metadata.jsonに含まれる`wk:metadataAutoFill`が`True`の場合、DOIが含まれれば本処理を実行する。  
+ro-crate-metadata.jsonに含まれる`wk:metadataAutoFill`が`true`の場合、DOIが含まれれば本処理を実行する。  
 本処理に用いるDOIは、`"jpcoar:relatopn"`の`"relationType"`が`"isVersionOf"`になる最初の要素の、`"cite-as"`の値である。  
 以下に例を記す。
 
@@ -417,7 +424,7 @@ ro-crate-metadata.jsonに含まれる`wk:metadataAutoFill`が`True`の場合、D
 }
 ```
 
-処理の詳細に関しては、[機能設計書:メタデータ補完機能(IF)]を参照のこと。
+メタデータ補完機能の詳細に関しては、[機能設計書:メタデータ補完機能(IF)]を参照のこと。
 
 ## 関連モジュール
 
